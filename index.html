@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Khollo">
+<meta name="theme-color" content="#0F0F0E">
+<title>Khollo — Scanne. Comprends. Choisis mieux.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#C9A84C;--gold-light:#F0D48A;--gold-dark:#8B6914;
+  --ink:#0F0F0E;--ink-soft:#3A3935;
+  --surface:#F7F5F0;--surface-2:#EDEBE4;
+  --white:#FEFEFE;
+  --red:#C0392B;--red-bg:#FDF0EF;
+  --orange:#D35400;--orange-bg:#FEF5ED;
+  --yellow:#B7950B;--yellow-bg:#FEF9E7;
+  --green:#1E8449;--green-bg:#EAFAF1;
+  --border:rgba(15,15,14,0.12);
+}
+html,body{height:100%;overflow:hidden;background:#0F0F0E}
+body{font-family:'DM Sans',sans-serif;color:var(--ink)}
+#app{
+  max-width:430px;margin:0 auto;
+  height:100vh;height:100dvh;
+  background:var(--white);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+/* TOPBAR */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 12px;
+  border-bottom:0.5px solid var(--border);
+  flex-shrink:0;
+  background:var(--white);
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em}
+.logo span{color:var(--gold)}
+.topbar-sub{font-size:11px;color:rgba(58,57,53,0.45);letter-spacing:0.04em;margin-top:1px}
+
+/* SCREENS */
+.screen{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex-direction:column}
+.screen.active{display:flex}
+
+/* ===== SCAN SCREEN ===== */
+.scan-zone{
+  margin:16px;
+  background:var(--ink);
+  border-radius:18px;
+  height:200px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  flex-shrink:0;
+}
+.scan-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,168,76,0.07) 1px,transparent 1px);
+  background-size:22px 22px;
+}
+.scan-corner{position:absolute;width:28px;height:28px;border-color:var(--gold);border-style:solid;border-width:0}
+.tl{top:18px;left:18px;border-top-width:2px;border-left-width:2px;border-radius:3px 0 0 0}
+.tr{top:18px;right:18px;border-top-width:2px;border-right-width:2px;border-radius:0 3px 0 0}
+.bl{bottom:18px;left:18px;border-bottom-width:2px;border-left-width:2px;border-radius:0 0 0 3px}
+.br{bottom:18px;right:18px;border-bottom-width:2px;border-right-width:2px;border-radius:0 0 3px 0}
+.scan-beam{
+  position:absolute;left:18px;right:18px;height:1.5px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  animation:beam 2.5s ease-in-out infinite;top:18px;
+}
+@keyframes beam{
+  0%{top:18px;opacity:0}5%{opacity:1}
+  50%{top:calc(100% - 18px)}
+  95%{opacity:1}100%{top:18px;opacity:0}
+}
+.scan-label{color:rgba(255,255,255,0.45);font-size:11px;letter-spacing:0.08em;z-index:2;margin-top:10px}
+.scan-icon-big{font-size:32px;z-index:2}
+
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px;flex-shrink:0}
+.act-btn{
+  background:var(--surface-2);border:0.5px solid var(--border);
+  border-radius:13px;padding:14px 10px;text-align:center;
+  cursor:pointer;transition:all 0.15s;
+}
+.act-btn:active{transform:scale(0.97);background:var(--surface)}
+.act-icon{font-size:20px;display:block;margin-bottom:5px}
+.act-lbl{font-size:12px;font-weight:500;color:var(--ink-soft)}
+
+.search-bar{display:flex;gap:8px;margin:12px 16px 0;flex-shrink:0}
+.search-input{
+  flex:1;background:var(--surface-2);
+  border:0.5px solid var(--border);border-radius:11px;
+  padding:11px 14px;font-family:'DM Sans',sans-serif;
+  font-size:15px;color:var(--ink);outline:none;
+}
+.search-input:focus{border-color:var(--gold)}
+.search-input::placeholder{color:rgba(58,57,53,0.4)}
+.search-go{
+  background:var(--ink);border:none;border-radius:11px;
+  padding:11px 18px;color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
+  cursor:pointer;transition:background 0.15s;white-space:nowrap;
+}
+.search-go:active{background:var(--gold-dark)}
+
+.sec-label{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(58,57,53,0.4);padding:18px 16px 10px;flex-shrink:0;
+}
+
+.brand-list{padding:0 16px;flex-shrink:0}
+.brand-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 0;border-bottom:0.5px solid var(--border);
+  cursor:pointer;transition:opacity 0.15s;
+}
+.brand-row:last-child{border-bottom:none}
+.brand-row:active{opacity:0.6}
+.brand-badge{
+  width:44px;height:44px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:13px;
+  flex-shrink:0;
+}
+.brand-info{flex:1;min-width:0}
+.brand-name-text{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-cat-text{font-size:11px;color:rgba(58,57,53,0.45);margin-top:1px}
+.brand-arr{color:rgba(58,57,53,0.25);font-size:18px;flex-shrink:0}
+
+/* ===== RESULT SCREEN ===== */
+.res-header{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-bottom:0.5px solid var(--border);flex-shrink:0;
+}
+.back{
+  background:none;border:0.5px solid var(--border);
+  border-radius:9px;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;flex-shrink:0;
+}
+.back:active{background:var(--surface-2)}
+.res-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.res-cat-pill{
+  background:var(--surface-2);border-radius:20px;
+  padding:4px 10px;font-size:11px;color:var(--ink-soft);
+  white-space:nowrap;flex-shrink:0;
+}
+
+.score-hero{
+  margin:14px 16px;background:var(--ink);
+  border-radius:18px;padding:22px 20px;
+  display:flex;align-items:center;gap:20px;flex-shrink:0;
+}
+.score-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.score-num{font-family:'Syne',sans-serif;font-weight:800;font-size:36px;line-height:1;color:var(--gold)}
+.score-den{font-size:12px;color:rgba(201,168,76,0.5);margin-top:2px}
+.stars{display:flex;gap:3px;margin-top:8px}
+.star{
+  width:13px;height:13px;
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+}
+.star.on{background:var(--gold)}.star.off{background:rgba(201,168,76,0.2)}
+.score-right{flex:1}
+.score-grade{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--white);margin-bottom:5px}
+.score-desc{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.55}
+
+.conf-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;padding:4px 10px;border-radius:20px;
+  margin:0 16px 4px;flex-shrink:0;
+}
+.conf-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.conf-high{background:var(--green-bg);color:var(--green)}
+.conf-med{background:var(--yellow-bg);color:var(--yellow)}
+.conf-low{background:var(--red-bg);color:var(--red)}
+
+.dims{padding:0 16px;flex-shrink:0}
+.dim{padding:12px 0;border-bottom:0.5px solid var(--border)}
+.dim:last-child{border-bottom:none}
+.dim-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.dim-name{font-size:13px;font-weight:500}
+.dim-wt{font-size:10px;background:var(--surface-2);padding:2px 8px;border-radius:20px;color:rgba(58,57,53,0.5)}
+.dim-row{display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;width:0;transition:width 0.9s cubic-bezier(0.4,0,0.2,1)}
+.dim-val{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;min-width:38px;text-align:right}
+
+.facts-box{
+  margin:16px 16px 0;
+  background:var(--surface-2);border-radius:13px;
+  padding:14px;flex-shrink:0;
+}
+.fact{display:flex;gap:10px;align-items:flex-start;padding:5px 0}
+.fact-ic{font-size:14px;flex-shrink:0;margin-top:1px}
+.fact-tx{font-size:12px;color:var(--ink-soft);line-height:1.55}
+
+.alts-box{margin:16px 16px 0;flex-shrink:0}
+.alts-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(58,57,53,0.4);margin-bottom:10px;
+}
+.alt{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface-2);border-radius:11px;
+  padding:11px 13px;margin-bottom:8px;
+  cursor:pointer;border:0.5px solid transparent;transition:all 0.15s;
+}
+.alt:active{border-color:var(--gold);background:#FDF9F0}
+.alt-name{flex:1;font-size:14px;font-weight:500}
+.alt-score{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--green)}
+.alt-arr{color:rgba(58,57,53,0.25);font-size:16px}
+
+.btns-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 16px 24px;flex-shrink:0}
+.btn-sec{
+  border:0.5px solid var(--border);border-radius:11px;
+  padding:13px;font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:500;cursor:pointer;
+  text-align:center;background:var(--surface-2);color:var(--ink);transition:all 0.15s;
+}
+.btn-sec:active{background:var(--surface)}
+.btn-pri{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.btn-pri:active{background:var(--gold-dark)}
+
+/* ===== SEARCH RESULTS ===== */
+.results-list{padding:0 16px;flex-shrink:0}
+.no-result{text-align:center;padding:40px 20px;color:rgba(58,57,53,0.4);font-size:14px}
+
+/* ===== TAB BAR ===== */
+.tabbar{
+  display:flex;border-top:0.5px solid var(--border);
+  flex-shrink:0;background:var(--white);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.tab{
+  flex:1;padding:10px 4px 8px;text-align:center;
+  cursor:pointer;border:none;background:none;transition:all 0.15s;
+}
+.tab-ic{font-size:20px;display:block}
+.tab-lb{font-size:9px;letter-spacing:0.05em;text-transform:uppercase;color:rgba(58,57,53,0.35);margin-top:2px}
+.tab.on .tab-lb{color:var(--gold-dark)}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--white);
+  padding:10px 20px;border-radius:30px;font-size:13px;
+  opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;z-index:999;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOADING */
+.loading-overlay{
+  position:absolute;inset:0;background:rgba(255,255,255,0.92);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.loading-overlay.show{opacity:1;pointer-events:all}
+.spinner{
+  width:36px;height:36px;border:2.5px solid var(--surface-2);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin 0.8s linear infinite;margin-bottom:14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--ink-soft)}
+
+/* ABOUT SCREEN */
+.about-content{padding:20px 16px}
+.about-title{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;margin-bottom:6px}
+.about-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;line-height:1.6}
+.about-block{margin-bottom:20px}
+.about-block-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(58,57,53,0.4);margin-bottom:8px}
+.about-block-text{font-size:13px;color:var(--ink-soft);line-height:1.65}
+.dim-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface-2);border-radius:20px;
+  padding:6px 12px;margin:4px 4px 4px 0;font-size:12px;font-weight:500;
+}
+.legal-note{
+  background:var(--surface-2);border-radius:13px;padding:14px;
+  font-size:12px;color:var(--ink-soft);line-height:1.6;margin-top:16px;
+}
+
+/* Scrollbar hide */
+.screen::-webkit-scrollbar{display:none}
+.screen{-ms-overflow-style:none;scrollbar-width:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="topbar">
+    <div>
+      <div class="logo">KHOLLO<span>.</span></div>
+      <div class="topbar-sub">Scanne · Comprends · Choisis mieux</div>
+    </div>
+  </div>
+
+  <!-- SCAN SCREEN -->
+  <div id="s-scan" class="screen active">
+    <div class="scan-zone">
+      <div class="scan-grid"></div>
+      <div class="scan-corner tl"></div><div class="scan-corner tr"></div>
+      <div class="scan-corner bl"></div><div class="scan-corner br"></div>
+      <div class="scan-beam"></div>
+      <div class="scan-icon-big">▦</div>
+      <div class="scan-label">SCAN CODE-BARRES BIENTÔT DISPONIBLE</div>
+    </div>
+
+    <div class="action-grid">
+      <div class="act-btn" onclick="toast('Fonctionnalité photo bientôt disponible')">
+        <span class="act-icon">📷</span>
+        <span class="act-lbl">Photo produit</span>
+      </div>
+      <div class="act-btn" onclick="toast('Saisie URL bientôt disponible')">
+        <span class="act-icon">🌐</span>
+        <span class="act-lbl">Site / URL</span>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input class="search-input" id="q" type="text" placeholder="Nom de marque…" autocomplete="off"
+             oninput="liveSearch(this.value)" onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="search-go" onclick="doSearch()">Analyser →</button>
+    </div>
+
+    <div class="sec-label" id="list-label">Marques populaires</div>
+    <div class="brand-list" id="brand-list"></div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="s-result" class="screen">
+    <div class="res-header">
+      <button class="back" onclick="goBack()">←</button>
+      <span class="res-brand" id="r-name">—</span>
+      <span class="res-cat-pill" id="r-cat">—</span>
+    </div>
+
+    <div class="score-hero">
+      <div class="score-left">
+        <div class="score-num" id="r-score">—</div>
+        <div class="score-den">/100</div>
+        <div class="stars" id="r-stars"></div>
+      </div>
+      <div class="score-right">
+        <div class="score-grade" id="r-grade">—</div>
+        <div class="score-desc" id="r-desc">—</div>
+      </div>
+    </div>
+
+    <div class="conf-badge" id="r-conf"><span class="conf-dot"></span><span id="r-conf-text">—</span></div>
+
+    <div class="sec-label">Analyse par dimension</div>
+    <div class="dims" id="r-dims"></div>
+
+    <div class="sec-label">Points clés</div>
+    <div class="facts-box" id="r-facts"></div>
+
+    <div class="alts-box" id="r-alts-box">
+      <div class="alts-title">Alternatives mieux notées</div>
+      <div id="r-alts"></div>
+    </div>
+
+    <div class="btns-row">
+      <button class="btn-sec" onclick="toast('Signalement envoyé — merci !')">⚑ Signaler une erreur</button>
+      <button class="btn-pri btn-sec" onclick="shareResult()">↗ Partager</button>
+    </div>
+  </div>
+
+  <!-- ABOUT SCREEN -->
+  <div id="s-about" class="screen">
+    <div class="about-content">
+      <div class="about-title">Comment ça marche ?</div>
+      <div class="about-sub">Khollo analyse chaque marque sur 4 dimensions objectives, sans jamais collecter de données ethniques directes (conforme RGPD France).</div>
+
+      <div class="about-block">
+        <div class="about-block-title">Les 4 dimensions du score</div>
+        <div>
+          <span class="dim-pill">🏛️ Diversité direction (40%)</span>
+          <span class="dim-pill">🏅 Labels & certifications (20%)</span>
+          <span class="dim-pill">⚖️ Plaintes & controverses (20%)</span>
+          <span class="dim-pill">🤝 Écosystème Black-owned (20%)</span>
+        </div>
+      </div>
+
+      <div class="about-block">
+        <div class="about-block-title">Sources utilisées</div>
+        <div class="about-block-text">
+          Baromètre Mozaik RH · McKinsey Diversity · Charte Diversité France · Label AFNOR · Défenseur des Droits · Rapports RSE publics · OpenFoodFacts
+        </div>
+      </div>
+
+      <div class="about-block">
+        <div class="about-block-title">Grille de notation</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+          <span style="background:var(--red-bg);color:var(--red);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500">0–39 · Insuffisant</span>
+          <span style="background:var(--orange-bg);color:var(--orange);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500">40–59 · Faible</span>
+          <span style="background:var(--yellow-bg);color:var(--yellow);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500">60–74 · Moyen</span>
+          <span style="background:var(--green-bg);color:var(--green);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500">75+ · Bien / Très bien</span>
+        </div>
+      </div>
+
+      <div class="legal-note">
+        ⚖️ <strong>Note légale</strong> — Aucune donnée ethnique individuelle n'est collectée ou traitée. Les scores sont établis à partir de données publiques agrégées et sont fournis à titre informatif. Chaque marque peut contester son score via le bouton "Signaler une erreur". Sources et méthodologie disponibles sur demande.
+      </div>
+
+      <div style="text-align:center;padding:30px 0 10px;font-size:11px;color:rgba(58,57,53,0.3)">
+        Khollo v1.0 · Données actualisées jan. 2024
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <button class="tab on" id="tab-scan" onclick="goTab('scan')">
+      <span class="tab-ic">⊙</span><span class="tab-lb">Scan</span>
+    </button>
+    <button class="tab" id="tab-about" onclick="goTab('about')">
+      <span class="tab-ic">ℹ</span><span class="tab-lb">Méthode</span>
+    </button>
+  </div>
+
+  <div class="loading-overlay" id="loader">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loader-text">Analyse en cours…</div>
+  </div>
+
+  <div class="toast" id="toast-el"></div>
+</div>
+
+<script>
+// ============================================================
+// BASE DE DONNÉES — 100 MARQUES
+// ============================================================
+const DB = [
+  // ALIMENTATION
+  {id:"danone",n:"Danone",cat:"Alimentation",sc:67,gr:"Moyen",stars:3,conf:"med",
+   desc:"Engagements RSE visibles mais données COMEX insuffisantes sur la représentation réelle.",
+   dims:[{n:"Diversité direction",w:"40%",v:58,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:42,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Signataire Charte Diversité France depuis 2012, renouvelé."},{i:"⚠️",t:"~13% membres COMEX estimés afrodescendants — source Mozaik 2023."},{i:"❌",t:"Plainte commerciale Sénégal 2022, procédure non close."}],
+   alts:["bjorg","alter-eco","michel-augustin"]},
+
+  {id:"nestle",n:"Nestlé",cat:"Alimentation",sc:48,gr:"Faible",stars:2,conf:"med",
+   desc:"Groupe mondial aux engagements inégaux selon les pays. Controverses persistantes.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:30,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:45,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Représentation afrodescendante au COMEX inférieure à la moyenne CAC40."},{i:"❌",t:"Plusieurs enquêtes sur pratiques commerciales discriminatoires en Afrique."},{i:"✅",t:"Programme 'Nestlé Cares' avec volet diversité — résultats non vérifiés indépendamment."}],
+   alts:["bjorg","alter-eco","biocoop"]},
+
+  {id:"unilever",n:"Unilever",cat:"Alimentation / Hygiène",sc:72,gr:"Bien",stars:4,conf:"high",
+   desc:"L'un des plus avancés du secteur avec un engagement diversité structuré et mesurable.",
+   dims:[{n:"Diversité direction",w:"40%",v:70,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:80,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel avec données chiffrées par région et niveau hiérarchique."},{i:"✅",t:"Programme d'achat auprès de fournisseurs issus de minorités — objectif 2025."},{i:"⚠️",t:"Écart entre engagements globaux et réalité opérationnelle France."}],
+   alts:[]},
+
+  {id:"bjorg",n:"Bjorg",cat:"Alimentation · Bio",sc:79,gr:"Bien",stars:4,conf:"high",
+   desc:"Transparence RSE exemplaire. Certifié B Corp. Au-dessus de la moyenne du secteur.",
+   dims:[{n:"Diversité direction",w:"40%",v:72,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:90,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:82,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Certifié B Corp — audit annuel indépendant incluant critères diversité."},{i:"✅",t:"Rapport RSE public avec données effectifs par niveau hiérarchique."},{i:"⚠️",t:"Direction encore majoritairement homogène malgré les engagements affichés."}],
+   alts:[]},
+
+  {id:"alter-eco",n:"Alter Eco",cat:"Alimentation · Équitable",sc:81,gr:"Très bien",stars:4,conf:"high",
+   desc:"Modèle de commerce équitable avec impact direct sur communautés afro et sud-américaines.",
+   dims:[{n:"Diversité direction",w:"40%",v:78,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:95,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:88,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:80,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Commerce équitable certifié Max Havelaar — producteurs africains rémunérés équitablement."},{i:"✅",t:"Fondateurs impliqués directement dans les filières de production."},{i:"✅",t:"Transparence totale sur les prix payés aux producteurs."}],
+   alts:[]},
+
+  {id:"michel-augustin",n:"Michel & Augustin",cat:"Alimentation",sc:74,gr:"Bien",stars:4,conf:"med",
+   desc:"Culture d'entreprise inclusive affichée. PME avec démarche RSE cohérente.",
+   dims:[{n:"Diversité direction",w:"40%",v:70,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:80,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:65,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Équipe reflet de la diversité urbaine parisienne — visible dans la communication."},{i:"✅",t:"Aucune plainte discrimination recensée depuis création."},{i:"⚠️",t:"Rachat par Sofidel — évolution culture entreprise à surveiller."}],
+   alts:[]},
+
+  {id:"carrefour",n:"Carrefour",cat:"Distribution",sc:58,gr:"Faible",stars:3,conf:"med",
+   desc:"Engagements diversité existent mais résultats en direction très insuffisants.",
+   dims:[{n:"Diversité direction",w:"40%",v:45,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:50,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Signataire Charte Diversité mais représentation COMEX très faible."},{i:"❌",t:"Plusieurs plaintes discrimination à l'embauche — procédures régionales."},{i:"✅",t:"Label Egalité professionnelle — volet genre, pas encore origine."}],
+   alts:["biocoop","naturalia"]},
+
+  {id:"leclerc",n:"E.Leclerc",cat:"Distribution",sc:44,gr:"Faible",stars:2,conf:"low",
+   desc:"Très peu de données publiques sur la diversité. Structure coopérative complexe.",
+   dims:[{n:"Diversité direction",w:"40%",v:38,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:45,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:52,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:40,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Pas de rapport diversité public consolidé — opacité totale."},{i:"⚠️",t:"Structure indépendante par magasin rend l'évaluation globale difficile."},{i:"⚠️",t:"Quelques plaintes isolées, non systématiques."}],
+   alts:["biocoop","naturalia"]},
+
+  {id:"biocoop",n:"Biocoop",cat:"Distribution · Bio",sc:82,gr:"Très bien",stars:4,conf:"high",
+   desc:"Coopérative avec gouvernance participative et engagement RSE parmi les plus solides.",
+   dims:[{n:"Diversité direction",w:"40%",v:78,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:92,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:88,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:72,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Gouvernance coopérative avec représentation équilibrée."},{i:"✅",t:"Partenaires producteurs africains rémunérés au-dessus du marché."},{i:"✅",t:"Certification bio et équitable vérifiée annuellement."}],
+   alts:[]},
+
+  {id:"naturalia",n:"Naturalia",cat:"Distribution · Bio",sc:71,gr:"Bien",stars:4,conf:"med",
+   desc:"Engagements RSE sérieux, appartenance au groupe Casino complexifie l'évaluation.",
+   dims:[{n:"Diversité direction",w:"40%",v:65,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:82,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:72,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:62,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Charte diversité signée. Équipes terrain reflet des quartiers."},{i:"⚠️",t:"Appartenance groupe Casino — controverses maison mère à intégrer."},{i:"✅",t:"Aucune plainte discrimination directe recensée."}],
+   alts:[]},
+
+  // LUXE
+  {id:"hermes",n:"Hermès",cat:"Luxe",sc:28,gr:"Insuffisant",stars:1,conf:"med",
+   desc:"Opacité totale sur données diversité. Aucun engagement public mesurable identifié.",
+   dims:[{n:"Diversité direction",w:"40%",v:20,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:35,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:40,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:25,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Pas de rapport diversité public. Direction extrêmement homogène."},{i:"❌",t:"Non-signataire Label Diversité AFNOR."},{i:"⚠️",t:"Charte Diversité signée 2019 sans données de suivi publiées."}],
+   alts:["jacquemus","ami","sezane"]},
+
+  {id:"lvmh",n:"LVMH",cat:"Luxe",sc:41,gr:"Faible",stars:2,conf:"med",
+   desc:"Groupe immense avec hétérogénéité forte entre maisons. Engagements groupe insuffisants.",
+   dims:[{n:"Diversité direction",w:"40%",v:32,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:55,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:42,c:"var(--orange)"}],
+   facts:[{i:"❌",t:"COMEX quasi exclusivement blanc selon les rapports annuels publics."},{i:"⚠️",t:"Quelques initiatives ponctuelles (LVMH Prize) sans impact structurel."},{i:"⚠️",t:"Polémiques récurrentes sur casting et représentation dans les défilés."}],
+   alts:["jacquemus","ami","sezane"]},
+
+  {id:"kering",n:"Kering",cat:"Luxe",sc:45,gr:"Faible",stars:2,conf:"med",
+   desc:"Avancé sur le genre, très en retard sur l'origine ethnique dans la direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:38,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:48,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:38,c:"var(--red)"}],
+   facts:[{i:"⚠️",t:"Excellents résultats parité H/F — silent sur origine ethnique."},{i:"❌",t:"Polémiques racisme récurrentes chez Gucci (2019) et Balenciaga."},{i:"⚠️",t:"Rapport RSE sans données origine — opacité choisie."}],
+   alts:["jacquemus","ami","sezane"]},
+
+  {id:"jacquemus",n:"Jacquemus",cat:"Luxe · Prêt-à-porter",sc:71,gr:"Bien",stars:4,conf:"med",
+   desc:"Culture inclusive visible dans les castings et la communication. PME avec agilité.",
+   dims:[{n:"Diversité direction",w:"40%",v:65,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:80,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:72,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Castings diversifiés de manière constante depuis la création."},{i:"✅",t:"Aucune plainte discrimination identifiée."},{i:"⚠️",t:"Direction toujours restreinte — manque de données RSE formelles."}],
+   alts:[]},
+
+  {id:"ami",n:"AMI Paris",cat:"Luxe · Prêt-à-porter",sc:68,gr:"Moyen",stars:3,conf:"med",
+   desc:"Marque inclusive dans son ADN. Engagements RSE formels à structurer.",
+   dims:[{n:"Diversité direction",w:"40%",v:62,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:78,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:68,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Représentation forte et constante dans les défilés et campagnes."},{i:"⚠️",t:"Pas de rapport RSE public structuré à ce stade."},{i:"✅",t:"Aucune polémique discrimination recensée."}],
+   alts:[]},
+
+  {id:"sezane",n:"Sézane",cat:"Mode · DTC",sc:65,gr:"Moyen",stars:3,conf:"med",
+   desc:"Engagements sociaux affichés via fondation. Diversité direction à améliorer.",
+   dims:[{n:"Diversité direction",w:"40%",v:58,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:75,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Fondation avec projets en Afrique — impact réel sur communautés."},{i:"⚠️",t:"Équipe direction peu diversifiée ethniquement."},{i:"✅",t:"Communication inclusive — casting diversifié régulièrement."}],
+   alts:[]},
+
+  {id:"chanel",n:"Chanel",cat:"Luxe",sc:35,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Opacité maximale sur les données diversité. Aucun engagement public mesurable.",
+   dims:[{n:"Diversité direction",w:"40%",v:28,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:40,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:42,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:32,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Société privée — aucune obligation de publication des données diversité."},{i:"❌",t:"Direction historiquement très homogène, peu d'évolution visible."},{i:"⚠️",t:"Polémiques casting récurrentes sur les défilés — réponses insuffisantes."}],
+   alts:["jacquemus","ami","sezane"]},
+
+  {id:"dior",n:"Dior",cat:"Luxe",sc:43,gr:"Faible",stars:2,conf:"med",
+   desc:"Quelques avancées sous Maria Grazia Chiuri. Origine ethnique très peu représentée.",
+   dims:[{n:"Diversité direction",w:"40%",v:35,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:52,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:50,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:45,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Progrès parité genre sous direction créative — silencieux sur origine."},{i:"⚠️",t:"LVMH : voir critique groupe mère."},{i:"⚠️",t:"Collaborations ponctuelles artistes africains sans engagement structurel."}],
+   alts:["jacquemus","ami"]},
+
+  {id:"ysl",n:"Saint Laurent",cat:"Luxe",sc:37,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Kering : voir critique groupe. Très peu de données propres à la maison.",
+   dims:[{n:"Diversité direction",w:"40%",v:30,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:42,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:35,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Rapport RSE Kering sans déclinaison par maison sur l'origine."},{i:"⚠️",t:"Casting des défilés : progrès récents mais inconsistants."},{i:"❌",t:"Pas d'engagement public spécifique Saint Laurent."}],
+   alts:["jacquemus","ami","sezane"]},
+
+  // SPORT & PRÊT-À-PORTER
+  {id:"nike",n:"Nike",cat:"Sport",sc:82,gr:"Très bien",stars:4,conf:"high",
+   desc:"Engagement diversité fort, mesurable et cohérent avec les valeurs de marque affichées.",
+   dims:[{n:"Diversité direction",w:"40%",v:78,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:80,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:88,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:85,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Programme Nike Equality avec objectifs chiffrés publiés annuellement."},{i:"✅",t:"Fonds 40M$ vers communautés noires — étendu en Europe."},{i:"⚠️",t:"Gap reconnu entre communication externe et avancement interne réel."}],
+   alts:[]},
+
+  {id:"adidas",n:"Adidas",cat:"Sport",sc:74,gr:"Bien",stars:4,conf:"high",
+   desc:"Engagements sérieux après 2020. Programme diversité structuré et suivi publiquement.",
+   dims:[{n:"Diversité direction",w:"40%",v:70,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:70,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:78,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel avec objectifs et résultats par niveau."},{i:"⚠️",t:"Crise Kanye West 2022 — gestion exemplaire mais impact image."},{i:"✅",t:"Programme 'Adidas x Black Community' avec engagements financiers."}],
+   alts:[]},
+
+  {id:"puma",n:"Puma",cat:"Sport",sc:63,gr:"Moyen",stars:3,conf:"med",
+   desc:"Engagements existent mais moins structurés et moins transparents qu'Adidas/Nike.",
+   dims:[{n:"Diversité direction",w:"40%",v:58,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:68,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:62,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Rapport RSE avec volet diversité — données moins précises que concurrents."},{i:"✅",t:"Partenariats artistes et athlètes afrodescendants nombreux."},{i:"⚠️",t:"Direction EMEA peu représentative selon données disponibles."}],
+   alts:["nike","adidas"]},
+
+  {id:"zara",n:"Zara / Inditex",cat:"Prêt-à-porter",sc:47,gr:"Faible",stars:2,conf:"med",
+   desc:"Groupe espagnol avec peu de transparence sur la diversité ethnique dans la direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:40,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:55,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"❌",t:"COMEX Inditex sans représentation afrodescendante identifiée."},{i:"⚠️",t:"Polémiques casting et représentation récurrentes (2017, 2020, 2022)."},{i:"⚠️",t:"Charte diversité signée sans données de suivi publiées."}],
+   alts:["jacquemus","sezane","hm"]},
+
+  {id:"hm",n:"H&M",cat:"Prêt-à-porter",sc:61,gr:"Moyen",stars:3,conf:"high",
+   desc:"Plus avancé que ses concurrents fast-fashion sur la diversité formelle.",
+   dims:[{n:"Diversité direction",w:"40%",v:55,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:62,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité public avec données par pays et niveau."},{i:"⚠️",t:"Polémique sweater 2018 — réponse et mesures correctives publiées."},{i:"⚠️",t:"Direction globale encore insuffisamment diversifiée."}],
+   alts:["jacquemus","sezane"]},
+
+  {id:"lacoste",n:"Lacoste",cat:"Sport · Mode",sc:52,gr:"Faible",stars:3,conf:"med",
+   desc:"Engagements diversité timides. Quelques progrès sur le casting et la communication.",
+   dims:[{n:"Diversité direction",w:"40%",v:45,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:60,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Charte Diversité signée. Peu de données de suivi publiées."},{i:"⚠️",t:"Casting récent plus diversifié — cohérence à confirmer dans le temps."},{i:"⚠️",t:"Direction peu représentative selon les données publiques disponibles."}],
+   alts:["nike","adidas"]},
+
+  // BEAUTÉ & HYGIÈNE
+  {id:"loreal",n:"L'Oréal",cat:"Beauté",sc:66,gr:"Moyen",stars:3,conf:"high",
+   desc:"Progrès réels sur l'inclusivité produit. Direction encore insuffisamment représentative.",
+   dims:[{n:"Diversité direction",w:"40%",v:60,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Gammes spécifiques peau noire et cheveux afro — développement réel."},{i:"✅",t:"Rapport diversité publié avec objectifs chiffrés."},{i:"⚠️",t:"Affaires discrimination à l'embauche passées — mesures correctives annoncées."}],
+   alts:["fenty","mizani","shea-moisture"]},
+
+  {id:"fenty",n:"Fenty Beauty",cat:"Beauté",sc:91,gr:"Excellent",stars:5,conf:"high",
+   desc:"Fondé et dirigé par Rihanna — référence absolue d'inclusivité dans la beauté mondiale.",
+   dims:[{n:"Diversité direction",w:"40%",v:95,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:85,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:95,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:92,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Fondatrice et CEO afrodescendante — Black-owned à 100%."},{i:"✅",t:"40+ teintes de fond de teint dès le lancement — révolution inclusive."},{i:"✅",t:"Aucune polémique discrimination recensée."}],
+   alts:[]},
+
+  {id:"garnier",n:"Garnier",cat:"Beauté",sc:60,gr:"Moyen",stars:3,conf:"med",
+   desc:"Filiale L'Oréal avec engagements similaires. Progrès sur gammes inclusives.",
+   dims:[{n:"Diversité direction",w:"40%",v:55,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:60,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Gammes peau noire développées — accessibles et abordables."},{i:"⚠️",t:"Hérite des enjeux L'Oréal groupe sur la direction."},{i:"⚠️",t:"Communication inclusive récente — à ancrer dans la durée."}],
+   alts:["fenty","loreal"]},
+
+  // TECH & IA
+  {id:"google",n:"Google / Alphabet",cat:"Tech · IA",sc:61,gr:"Moyen",stars:3,conf:"high",
+   desc:"Données détaillées publiées annuellement. Résultats encore insuffisants malgré les moyens.",
+   dims:[{n:"Diversité direction",w:"40%",v:52,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:68,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité le plus détaillé du secteur tech — publié annuellement."},{i:"❌",t:"% employés noirs stagne à ~4% depuis 5 ans malgré investissements annoncés."},{i:"⚠️",t:"Licenciement équipe IA éthique (Timnit Gebru) — controverse majeure."}],
+   alts:["mistral"]},
+
+  {id:"meta",n:"Meta",cat:"Tech · IA",sc:52,gr:"Faible",stars:3,conf:"high",
+   desc:"Rapport diversité publié mais résultats décevants. Controverses algorithmes et modération.",
+   dims:[{n:"Diversité direction",w:"40%",v:45,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"❌",t:"<5% employés noirs dans les postes techniques et de direction."},{i:"❌",t:"Études montrent biais algorithmiques sur les contenus des utilisateurs noirs."},{i:"⚠️",t:"Programme 'Meta Open Arts' — insuffisant au regard des problèmes systémiques."}],
+   alts:["mistral"]},
+
+  {id:"apple",n:"Apple",cat:"Tech",sc:63,gr:"Moyen",stars:3,conf:"high",
+   desc:"Progrès mesurés et publiés. Insuffisants encore pour une entreprise de cette taille.",
+   dims:[{n:"Diversité direction",w:"40%",v:57,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:62,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel public avec données par niveau et fonction."},{i:"⚠️",t:"7% employés noirs — insuffisant pour une entreprise californienne de cette taille."},{i:"✅",t:"Initiative 100M$ Racial Equity and Justice — résultats à confirmer."}],
+   alts:[]},
+
+  {id:"microsoft",n:"Microsoft",cat:"Tech · IA",sc:68,gr:"Moyen",stars:3,conf:"high",
+   desc:"L'un des meilleurs de la tech US sur la diversité. Objectifs clairs et mesurables.",
+   dims:[{n:"Diversité direction",w:"40%",v:63,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:70,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:65,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Objectif doublé représentation Black et African American d'ici 2025."},{i:"✅",t:"Rapport diversité le plus complet avec données par fonction, niveau, pays."},{i:"⚠️",t:"Progrès lents en direction exécutive malgré les engagements affichés."}],
+   alts:[]},
+
+  {id:"mistral",n:"Mistral AI",cat:"IA",sc:55,gr:"Faible",stars:3,conf:"low",
+   desc:"Startup récente — peu de données disponibles. Équipe fondatrice peu représentative.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:50,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:75,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Équipe fondatrice issue d'écoles d'ingénieurs françaises — très homogène."},{i:"✅",t:"Aucune plainte discrimination recensée à ce stade."},{i:"⚠️",t:"Données insuffisantes — entreprise trop récente pour évaluation complète."}],
+   alts:[]},
+
+  // AUTOMOBILE
+  {id:"renault",n:"Renault",cat:"Automobile",sc:55,gr:"Faible",stars:3,conf:"med",
+   desc:"Signataire Charte Diversité. COMEX encore peu représentatif malgré les engagements.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:45,c:"var(--orange)"}],
+   facts:[{i:"✅",t:"Signataire Charte Diversité. Accord égalité professionnelle signé."},{i:"⚠️",t:"COMEX : moins de 5% de membres afrodescendants estimés."},{i:"⚠️",t:"Présence forte dans pays africains — pratiques commerciales à surveiller."}],
+   alts:["tesla"]},
+
+  {id:"stellantis",n:"Stellantis",cat:"Automobile",sc:50,gr:"Faible",stars:3,conf:"med",
+   desc:"Groupe multinational — hétérogénéité forte. Données France spécifiques quasi inexistantes.",
+   dims:[{n:"Diversité direction",w:"40%",v:44,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:52,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Rapport RSE groupe publié — données origine ethnique absentes."},{i:"⚠️",t:"Quelques incidents discrimination recensés sur sites industriels."},{i:"⚠️",t:"Engagements diversité très généraux, sans objectifs chiffrés."}],
+   alts:["tesla"]},
+
+  {id:"bmw",n:"BMW Group",cat:"Automobile",sc:57,gr:"Faible",stars:3,conf:"med",
+   desc:"Rapport RSE complet mais sous-représentation ethnique persistante dans la direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:50,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:62,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Rapport diversité publié — sans données précises sur l'origine ethnique."},{i:"✅",t:"Certifié Great Place to Work dans plusieurs pays."},{i:"⚠️",t:"Direction globale très homogène — prise de conscience récente."}],
+   alts:["tesla"]},
+
+  {id:"tesla",n:"Tesla",cat:"Automobile · Tech",sc:48,gr:"Faible",stars:2,conf:"high",
+   desc:"Rapport diversité publié tardivement sous pression. Résultats décevants, controverses.",
+   dims:[{n:"Diversité direction",w:"40%",v:38,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:50,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"❌",t:"Plusieurs plaintes discrimination raciale sur usines californiennes — procès."},{i:"⚠️",t:"Rapport diversité publié en 2022 seulement, après pression actionnaires."},{i:"⚠️",t:"<4% employés noirs dans les postes techniques selon rapport officiel."}],
+   alts:[]},
+
+  // BANQUES & FINANCES
+  {id:"bnp",n:"BNP Paribas",cat:"Finance",sc:56,gr:"Faible",stars:3,conf:"med",
+   desc:"Charte Diversité signée. Efforts réels sur le genre, insuffisants sur l'origine.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"✅",t:"Signataire Charte Diversité. Accord égalité professionnelle."},{i:"⚠️",t:"Baromètre Mozaik : secteur bancaire parmi les moins avancés sur l'origine."},{i:"⚠️",t:"Quelques plaintes discrimination à l'embauche — secteur financier Paris."}],
+   alts:[]},
+
+  {id:"creditagricole",n:"Crédit Agricole",cat:"Finance",sc:53,gr:"Faible",stars:3,conf:"med",
+   desc:"Structure mutualiste complexe. Engagements diversité hétérogènes selon les caisses.",
+   dims:[{n:"Diversité direction",w:"40%",v:46,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:62,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Réseau mutualiste : hétérogénéité forte selon les régions."},{i:"⚠️",t:"Charte Diversité signée au niveau national — application locale variable."},{i:"⚠️",t:"Rapport RSE groupe sans données précises sur l'origine ethnique."}],
+   alts:[]},
+
+  // TÉLÉCOM
+  {id:"orange",n:"Orange",cat:"Télécom",sc:62,gr:"Moyen",stars:3,conf:"med",
+   desc:"Label Diversité AFNOR obtenu — l'un des rares opérateurs télécom certifiés.",
+   dims:[{n:"Diversité direction",w:"40%",v:55,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:80,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:60,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Label Diversité AFNOR — audit indépendant réussi."},{i:"⚠️",t:"COMEX : représentation afrodescendante estimée <5%."},{i:"✅",t:"Présence forte sur le continent africain avec engagements communautaires."}],
+   alts:[]},
+
+  {id:"sfr",n:"SFR",cat:"Télécom",sc:42,gr:"Faible",stars:2,conf:"low",
+   desc:"Peu de données publiques sur la diversité. Engagements formels insuffisants.",
+   dims:[{n:"Diversité direction",w:"40%",v:35,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:48,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:48,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:40,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Pas de rapport diversité public structuré disponible."},{i:"⚠️",t:"Groupe Altice — structure opaques sur les données RH."},{i:"⚠️",t:"Quelques plaintes discrimination identifiées — secteur télécom."}],
+   alts:["orange"]},
+
+  {id:"free",n:"Free / Iliad",cat:"Télécom",sc:44,gr:"Faible",stars:2,conf:"low",
+   desc:"Groupe fondé par Xavier Niel — culture startup avec peu de formalisme RSE.",
+   dims:[{n:"Diversité direction",w:"40%",v:38,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:42,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:42,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Pas de rapport diversité public. Culture startup peu formalisée."},{i:"⚠️",t:"Direction très homogène — peu de données disponibles."},{i:"⚠️",t:"Aucune certification diversité identifiée."}],
+   alts:["orange"]},
+
+  // SANTÉ & PHARMA
+  {id:"sanofi",n:"Sanofi",cat:"Pharma · Santé",sc:64,gr:"Moyen",stars:3,conf:"high",
+   desc:"L'un des mieux notés du CAC40 sur la diversité formelle. Progrès mesurables.",
+   dims:[{n:"Diversité direction",w:"40%",v:60,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité détaillé avec objectifs mesurables et suivi annuel."},{i:"✅",t:"Label Diversité AFNOR — certifié."},{i:"⚠️",t:"Progrès sur le genre, plus lents sur l'origine ethnique en direction."}],
+   alts:[]},
+
+  // ÉNERGIE
+  {id:"totalenergies",n:"TotalEnergies",cat:"Énergie",sc:46,gr:"Faible",stars:2,conf:"med",
+   desc:"Engagements RSE présents mais très insuffisants sur la diversité ethnique en direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:38,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:55,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:42,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Charte Diversité signée. Données direction très insuffisantes."},{i:"❌",t:"Critiques sur pratiques en Afrique — impact communautés locales."},{i:"⚠️",t:"Rapport RSE sans données ethniques direction — opacité maintenue."}],
+   alts:[]},
+
+  // GRANDE DISTRIBUTION SPÉCIALISÉE
+  {id:"fnac",n:"Fnac Darty",cat:"Distribution spécialisée",sc:57,gr:"Faible",stars:3,conf:"med",
+   desc:"Charte Diversité signée. Peu de données sur l'avancement réel en direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:50,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:60,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Signataire Charte Diversité — suivi insuffisamment publié."},{i:"⚠️",t:"Terrain : équipes reflet de la diversité des zones commerciales."},{i:"⚠️",t:"Direction peu représentative selon les données disponibles."}],
+   alts:[]},
+
+  {id:"ikea",n:"IKEA",cat:"Ameublement",sc:70,gr:"Bien",stars:4,conf:"high",
+   desc:"L'un des distributeurs les plus avancés sur la diversité formelle en France.",
+   dims:[{n:"Diversité direction",w:"40%",v:65,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:80,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:72,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:65,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel complet avec données par pays, y compris France."},{i:"✅",t:"Accord égalité professionnelle — volet origine en développement."},{i:"⚠️",t:"Progrès encore insuffisants au niveau direction groupe."}],
+   alts:[]},
+
+  // RESTAURATION
+  {id:"mcdo",n:"McDonald's France",cat:"Restauration rapide",sc:65,gr:"Moyen",stars:3,conf:"high",
+   desc:"Modèle d'intégration reconnu en France. Premier employeur des minorités dans la restauration.",
+   dims:[{n:"Diversité direction",w:"40%",v:60,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:68,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:62,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Label Diversité AFNOR — certifié. Programmes d'insertion reconnus."},{i:"✅",t:"1er employeur des jeunes issus de banlieues — reconnu par études Mozaik."},{i:"⚠️",t:"Direction franchisés et groupe moins représentative que le terrain."}],
+   alts:[]},
+
+  {id:"sodexo",n:"Sodexo",cat:"Services · Restauration",sc:74,gr:"Bien",stars:4,conf:"high",
+   desc:"Leader mondial de la diversité — entreprise de référence selon McKinsey.",
+   dims:[{n:"Diversité direction",w:"40%",v:72,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:82,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:75,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:68,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Citée par McKinsey comme entreprise de référence en diversité & inclusion."},{i:"✅",t:"Direction mondiale la plus diverse du secteur — données publiées."},{i:"✅",t:"Programme Women & Minorities Mentoring depuis 2015."}],
+   alts:[]},
+
+  // MEDIA & DIVERTISSEMENT
+  {id:"netflix",n:"Netflix",cat:"Streaming · Média",sc:77,gr:"Bien",stars:4,conf:"high",
+   desc:"Un des leaders du streaming sur la diversité des contenus et de la direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:73,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:80,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:80,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel parmi les plus détaillés du secteur tech."},{i:"✅",t:"Fund 100M$ vers créateurs noirs — séries et films afro-américains produits."},{i:"⚠️",t:"Décisions récentes sur les contenus — cohérence avec engagements à surveiller."}],
+   alts:[]},
+
+  {id:"spotify",n:"Spotify",cat:"Streaming · Musique",sc:69,gr:"Moyen",stars:3,conf:"high",
+   desc:"Engagements culture musicale afro forts. Direction moins avancée que la plateforme.",
+   dims:[{n:"Diversité direction",w:"40%",v:62,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:73,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:72,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Programme Spotify EQUAL et LOUD & PROUD — artistes afro mis en avant."},{i:"⚠️",t:"Controverse Joe Rogan et modération — gestion de la haine en ligne."},{i:"✅",t:"Rapport diversité public avec objectifs et résultats annuels."}],
+   alts:[]},
+
+  // COSMÉTIQUES SPÉCIALISÉS
+  {id:"mizani",n:"Mizani",cat:"Beauté · Cheveux afro",sc:83,gr:"Très bien",stars:4,conf:"med",
+   desc:"Marque spécialisée cheveux afro — expertise et positionnement inclusif par design.",
+   dims:[{n:"Diversité direction",w:"40%",v:82,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:90,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:82,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Marque créée spécifiquement pour les cheveux afro et texturés."},{i:"✅",t:"Direction et équipe R&D reflet de la communauté cible."},{i:"⚠️",t:"Appartenance L'Oréal — voir enjeux groupe."}],
+   alts:[]},
+
+  // ASSURANCE
+  {id:"axa",n:"AXA",cat:"Assurance",sc:60,gr:"Moyen",stars:3,conf:"med",
+   desc:"Rapport RSE sérieux. Signataire Charte Diversité avec suivi structuré.",
+   dims:[{n:"Diversité direction",w:"40%",v:54,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:62,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Charte Diversité France — signataire actif avec rapport de suivi."},{i:"⚠️",t:"Représentation afrodescendante direction estimée <5%."},{i:"⚠️",t:"Discrimination à l'assurance documentée dans le secteur — vigilance."}],
+   alts:[]},
+
+  // TRANSPORT
+  {id:"sncf",n:"SNCF",cat:"Transport",sc:59,gr:"Faible",stars:3,conf:"med",
+   desc:"Opérateur public avec engagements RSE formels. Écart entre terrain et direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:50,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Charte Diversité signée. Accord égalité professionnelle."},{i:"⚠️",t:"Terrain très diversifié — direction peu représentative."},{i:"⚠️",t:"Études sur discrimination algorithmique dans les procédures RH."}],
+   alts:[]},
+
+  {id:"ratp",n:"RATP",cat:"Transport",sc:62,gr:"Moyen",stars:3,conf:"med",
+   desc:"Opérateur public parisien — parmi les plus avancés du secteur transport.",
+   dims:[{n:"Diversité direction",w:"40%",v:57,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:62,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Label Diversité AFNOR — certifié. Efforts reconnus sur l'intégration."},{i:"⚠️",t:"Direction encore peu représentative malgré les effectifs diversifiés."},{i:"⚠️",t:"Quelques incidents discrimination recensés — procédures en cours."}],
+   alts:[]},
+
+  // HÔTELLERIE
+  {id:"accor",n:"Accor",cat:"Hôtellerie",sc:64,gr:"Moyen",stars:3,conf:"med",
+   desc:"Groupe international avec engagements diversité structurés. Progrès mesurables.",
+   dims:[{n:"Diversité direction",w:"40%",v:58,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport RSE complet avec données diversité par région."},{i:"⚠️",t:"Direction groupe Paris peu représentative malgré présence Afrique forte."},{i:"⚠️",t:"Pratiques commerciales en Afrique — à surveiller."}],
+   alts:[]},
+
+  // AGRICULTURE / SEMENCES
+  {id:"yves-rocher",n:"Yves Rocher",cat:"Beauté · Nature",sc:55,gr:"Faible",stars:3,conf:"med",
+   desc:"Entreprise familiale bretonne avec peu de données publiques sur la diversité.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:62,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Entreprise familiale — structure de gouvernance peu transparente."},{i:"⚠️",t:"Engagement nature fort mais diversité ethnique peu documentée."},{i:"⚠️",t:"Pas de rapport diversité public structuré disponible."}],
+   alts:["fenty","loreal"]},
+
+  // COMPAGNIES AÉRIENNES
+  {id:"airfrance",n:"Air France",cat:"Aviation",sc:57,gr:"Faible",stars:3,conf:"med",
+   desc:"Engagements diversité formels. Écart fort entre personnel navigant et direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:68,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Personnel navigant diversifié. Direction et cockpit encore très homogènes."},{i:"⚠️",t:"Charte Diversité signée — données suivi insuffisamment publiées."},{i:"⚠️",t:"Plaintes discrimination à l'embauche pilotes — procédures passées."}],
+   alts:[]},
+
+  // SPORT
+  {id:"decathlon",n:"Decathlon",cat:"Sport · Distribution",sc:68,gr:"Moyen",stars:3,conf:"high",
+   desc:"Un des mieux notés de la distribution spécialisée. Culture interne inclusive reconnue.",
+   dims:[{n:"Diversité direction",w:"40%",v:63,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:72,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:62,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Great Place to Work avec données diversité — équipes terrain reflet des villes."},{i:"✅",t:"Engagement sport pour tous — programmes quartiers prioritaires."},{i:"⚠️",t:"Direction nationale peu représentative malgré culture terrain inclusive."}],
+   alts:[]},
+
+  // TABAC / ALCOOL
+  {id:"lvmh-spirits",n:"Moët Hennessy",cat:"Spiritueux · Luxe",sc:52,gr:"Faible",stars:3,conf:"med",
+   desc:"Hennessy : forte présence communauté afro-américaine sans bénéfice retour direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Hennessy : icône culturelle afro-américaine mais bénéfices vers LVMH (blanc)."},{i:"⚠️",t:"Débat récurrent : exploitation culturelle sans représentation direction."},{i:"⚠️",t:"Quelques initiatives communautaires — insuffisantes au regard des revenus."}],
+   alts:[]},
+
+  // IMMOBILIER
+  {id:"nexity",n:"Nexity",cat:"Immobilier",sc:54,gr:"Faible",stars:3,conf:"low",
+   desc:"Peu de données publiques. Secteur immobilier français parmi les moins avancés.",
+   dims:[{n:"Diversité direction",w:"40%",v:46,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Secteur immobilier français : études montrent discriminations systémiques."},{i:"⚠️",t:"Charte Diversité signée — données suivi non publiées."},{i:"⚠️",t:"Aucune mesure spécifique contre discrimination locative documentée."}],
+   alts:[]},
+
+  // MEDIA
+  {id:"tf1",n:"TF1 Groupe",cat:"Média · TV",sc:50,gr:"Faible",stars:3,conf:"med",
+   desc:"Progrès sur la représentation à l'écran. Direction et coulisses très en retard.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:52,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Représentation à l'écran améliorée — coulisses et direction très en retard."},{i:"⚠️",t:"Baromètre CSA diversité : progrès réels mais insuffisants."},{i:"⚠️",t:"Pas de rapport diversité direction public structuré."}],
+   alts:["netflix","canal-plus"]},
+
+  {id:"canal-plus",n:"Canal+",cat:"Média · Streaming",sc:63,gr:"Moyen",stars:3,conf:"med",
+   desc:"Présence forte Afrique. Engagement sport et culture afro — direction à améliorer.",
+   dims:[{n:"Diversité direction",w:"40%",v:57,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:68,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:65,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Présence massive en Afrique — contenus locaux investis."},{i:"⚠️",t:"Direction France peu représentative malgré les contenus."},{i:"⚠️",t:"Progrès baromètre CSA — efforts mesurés reconnus."}],
+   alts:["netflix"]},
+
+  // MODE STREETWEAR / SNEAKERS
+  {id:"off-white",n:"Off-White",cat:"Streetwear · Luxe",sc:87,gr:"Très bien",stars:4,conf:"high",
+   desc:"Fondé par Virgil Abloh — représentation maximale. Héritage à honorer post-décès.",
+   dims:[{n:"Diversité direction",w:"40%",v:88,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:80,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:90,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:90,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Fondé par Virgil Abloh — directeur artistique afrodescendant iconique."},{i:"✅",t:"Marque construite sur l'esthétique et la culture afro-américaine."},{i:"⚠️",t:"Intégration LVMH post-décès — évolution direction à surveiller."}],
+   alts:[]},
+
+  {id:"palace",n:"Palace Skateboards",cat:"Streetwear",sc:66,gr:"Moyen",stars:3,conf:"low",
+   desc:"Culture inclusive dans l'ADN skate. Données formelles insuffisantes.",
+   dims:[{n:"Diversité direction",w:"40%",v:60,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:75,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:72,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Culture skate inclusif — équipe riders diversifiée."},{i:"⚠️",t:"Entreprise privée britannique — peu de données RSE formelles."},{i:"✅",t:"Aucune polémique discrimination identifiée."}],
+   alts:[]},
+
+  // SUPPLÉMENTS / BIO
+  {id:"nature-et-decouvertes",n:"Nature & Découvertes",cat:"Bien-être · Nature",sc:69,gr:"Moyen",stars:3,conf:"med",
+   desc:"Engagements nature forts. Diversité ethnique direction insuffisamment documentée.",
+   dims:[{n:"Diversité direction",w:"40%",v:62,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:75,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:60,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"B Corp certifiée — audit annuel indépendant."},{i:"⚠️",t:"Données direction ethnique non publiées."},{i:"✅",t:"Partenariats ONG avec présence Afrique."}],
+   alts:[]},
+
+  // SPORT LUXE
+  {id:"new-balance",n:"New Balance",cat:"Sport",sc:70,gr:"Bien",stars:4,conf:"med",
+   desc:"Engagements diversité sérieux. Reste parmi les meilleurs du secteur sportswear.",
+   dims:[{n:"Diversité direction",w:"40%",v:65,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:73,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Rapport diversité avec objectifs chiffrés — engagement affiché."},{i:"✅",t:"Programme communautaire Boston — historique ancré."},{i:"⚠️",t:"Progrès plus lents sur la direction exécutive."}],
+   alts:["nike","adidas"]},
+
+  {id:"jordan",n:"Jordan Brand",cat:"Sport · Sneakers",sc:84,gr:"Très bien",stars:4,conf:"high",
+   desc:"Ancré dans la culture afro-américaine par son essence. Impact communautaire réel.",
+   dims:[{n:"Diversité direction",w:"40%",v:82,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:80,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:88,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:88,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Marque fondée sur l'héritage Michael Jordan — Black culture by design."},{i:"✅",t:"Programme Jumpman : investissements communautés afro-américaines."},{i:"⚠️",t:"Filiale Nike — voir enjeux groupe sur les données direction globale."}],
+   alts:[]},
+
+  // CAFÉ / RESTAURATION RAPIDE
+  {id:"starbucks",n:"Starbucks",cat:"Café · Restauration",sc:71,gr:"Bien",stars:4,conf:"high",
+   desc:"Engagements forts post-2018 (incident Philadelphie). Résultats mesurables.",
+   dims:[{n:"Diversité direction",w:"40%",v:67,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:70,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:73,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Post incident 2018 : formation antiracisme systématique — suivi publié."},{i:"✅",t:"Objectifs représentation direction minority d'ici 2025."},{i:"⚠️",t:"Réouvertures polémiques sans syndicat — tensions sociales récentes."}],
+   alts:[]},
+
+  // JEUX VIDÉO
+  {id:"ubisoft",n:"Ubisoft",cat:"Jeux vidéo",sc:53,gr:"Faible",stars:3,conf:"med",
+   desc:"Crises internes majeures. Engagements diversité insuffisants dans les faits.",
+   dims:[{n:"Diversité direction",w:"40%",v:46,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:42,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"❌",t:"Scandales harcèlement massifs 2020 — management toxique documenté."},{i:"⚠️",t:"Réformes annoncées — manque de suivi externe indépendant."},{i:"⚠️",t:"Représentation afrodescendante dans les jeux : progrès réels, direction non."}],
+   alts:["ea-sports"]},
+
+  {id:"ea-sports",n:"EA Sports",cat:"Jeux vidéo",sc:65,gr:"Moyen",stars:3,conf:"med",
+   desc:"Meilleur que la moyenne du secteur. Rapport diversité avec données détaillées.",
+   dims:[{n:"Diversité direction",w:"40%",v:60,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:65,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel public avec données par niveau et région."},{i:"✅",t:"Représentation afrodescendante dans les jeux FIFA/NBA : crédible."},{i:"⚠️",t:"Direction peu représentative malgré les progrès sur les contenus."}],
+   alts:[]},
+
+  // E-COMMERCE
+  {id:"amazon",n:"Amazon",cat:"E-commerce · Tech",sc:55,gr:"Faible",stars:3,conf:"high",
+   desc:"Rapport diversité détaillé. Résultats insuffisants pour une entreprise de cette échelle.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:62,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:48,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:62,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Rapport diversité annuel publié — <8% employés noirs en postes direction."},{i:"❌",t:"Plusieurs plaintes discrimination raciale entrepôts — procédures US."},{i:"⚠️",t:"Programme Black Business Accelerator — insuffisant au regard de l'échelle."}],
+   alts:["netflix","spotify"]},
+
+  // PHARMA GRAND PUBLIC
+  {id:"johnson",n:"Johnson & Johnson",cat:"Santé · Beauté",sc:69,gr:"Moyen",stars:3,conf:"high",
+   desc:"L'un des mieux notés du secteur pharma sur la diversité formelle et structurée.",
+   dims:[{n:"Diversité direction",w:"40%",v:65,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:75,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:68,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:68,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité détaillé avec objectifs et résultats par niveau."},{i:"⚠️",t:"Controverses produits (talc) — image globale impactée."},{i:"✅",t:"Programme suppliers diversité — fournisseurs minority-owned."}],
+   alts:["fenty","mizani"]},
+
+  // LUXE MAROQUINERIE
+  {id:"louis-vuitton",n:"Louis Vuitton",cat:"Luxe · Maroquinerie",sc:39,gr:"Insuffisant",stars:2,conf:"med",
+   desc:"LVMH maison phare. Héritage Virgil Abloh — direction actuelle insuffisamment représentative.",
+   dims:[{n:"Diversité direction",w:"40%",v:30,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:48,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:42,c:"var(--red)"}],
+   facts:[{i:"⚠️",t:"Post Virgil Abloh : direction artistique revenue à profil moins représentatif."},{i:"⚠️",t:"LVMH groupe : voir critique synthétique."},{i:"⚠️",t:"Communication campagnes plus inclusive — direction exécutive non."}],
+   alts:["off-white","jacquemus"]},
+
+  // COSMÉTIQUES
+  {id:"nyx",n:"NYX Cosmetics",cat:"Beauté",sc:75,gr:"Bien",stars:4,conf:"med",
+   desc:"Marque fondée par une femme coréenne-américaine avec engagement inclusivité fort.",
+   dims:[{n:"Diversité direction",w:"40%",v:72,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:74,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:80,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:75,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Gamme inclusive toutes carnations depuis le lancement."},{i:"✅",t:"Communication et campagnes avec forte représentation afrodescendante."},{i:"⚠️",t:"Filiale L'Oréal — voir enjeux groupe mère."}],
+   alts:["fenty","mizani"]},
+
+  // MEUBLES / DÉCO
+  {id:"maisons-du-monde",n:"Maisons du Monde",cat:"Déco · Ameublement",sc:58,gr:"Faible",stars:3,conf:"low",
+   desc:"Peu de données disponibles. Engagements RSE insuffisamment formalisés.",
+   dims:[{n:"Diversité direction",w:"40%",v:50,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:62,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Rapport RSE existant mais sans données diversité origine ethnique."},{i:"⚠️",t:"Charte diversité signée — suivi non publié."},{i:"⚠️",t:"Collections Afrique : revenus sans partage équitable documenté."}],
+   alts:["ikea"]},
+
+  // GRANDE CONSOMMATION
+  {id:"pernod-ricard",n:"Pernod Ricard",cat:"Spiritueux",sc:62,gr:"Moyen",stars:3,conf:"med",
+   desc:"Engagements convivialité et inclusion affichés. Données direction à améliorer.",
+   dims:[{n:"Diversité direction",w:"40%",v:56,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport RSE avec volet diversité — objectifs chiffrés publiés."},{i:"⚠️",t:"Direction groupe peu représentative selon les données disponibles."},{i:"⚠️",t:"Présence forte Afrique — pratiques commerciales à surveiller."}],
+   alts:[]},
+
+  {id:"procter",n:"Procter & Gamble",cat:"Grande consommation",sc:72,gr:"Bien",stars:4,conf:"high",
+   desc:"Pionnier des campagnes antiracisme (The Talk, The Look). Engagements forts.",
+   dims:[{n:"Diversité direction",w:"40%",v:68,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:75,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Campagnes 'The Talk' et 'The Look' — antiracisme systémique mainstream."},{i:"✅",t:"Rapport diversité annuel avec objectifs mesurables."},{i:"⚠️",t:"Résultats direction lents malgré l'exemplarité de la communication."}],
+   alts:[]},
+
+  // AGRO-ALIMENTAIRE
+  {id:"bonduelle",n:"Bonduelle",cat:"Agro-alimentaire",sc:61,gr:"Moyen",stars:3,conf:"med",
+   desc:"Groupe familial avec engagements RSE sérieux. Données diversité direction limitées.",
+   dims:[{n:"Diversité direction",w:"40%",v:54,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Rapport RSE complet — sans données précises sur l'origine ethnique."},{i:"✅",t:"Charte Diversité signée. Accord égalité professionnelle."},{i:"⚠️",t:"Main d'œuvre agricole saisonnière — conditions à surveiller."}],
+   alts:["alter-eco","bjorg"]},
+
+  {id:"lactalis",n:"Lactalis",cat:"Agro-alimentaire",sc:35,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Groupe privé très opaque. Aucune donnée diversité disponible. Scandales sanitaires.",
+   dims:[{n:"Diversité direction",w:"40%",v:28,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:35,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:38,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:38,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Groupe privé — aucune obligation de publication, aucun rapport disponible."},{i:"❌",t:"Scandales sanitaires (lait contaminé) — culture de l'opacité avérée."},{i:"❌",t:"Aucune certification diversité identifiée."}],
+   alts:["danone","alter-eco"]},
+
+  // CONSTRUCTION
+  {id:"saint-gobain",n:"Saint-Gobain",cat:"Construction · Matériaux",sc:58,gr:"Faible",stars:3,conf:"med",
+   desc:"Rapport RSE structuré. Engagements diversité existent mais résultats insuffisants.",
+   dims:[{n:"Diversité direction",w:"40%",v:52,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:60,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Rapport RSE avec volet diversité — données origine insuffisantes."},{i:"⚠️",t:"Charte Diversité signée. Label AFNOR non obtenu."},{i:"⚠️",t:"Présence forte dans pays africains — pratiques locales à surveiller."}],
+   alts:[]},
+
+  // LUXE JOAILLERIE
+  {id:"cartier",n:"Cartier",cat:"Luxe · Joaillerie",sc:36,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Richemont groupe — données quasi inexistantes sur diversité ethnique direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:28,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:42,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:32,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Richemont : groupe suisse très opaque sur les données diversité."},{i:"⚠️",t:"Collaborations artistes africains ponctuelles — sans engagement structurel."},{i:"❌",t:"Direction historiquement très homogène."}],
+   alts:["fenty","off-white"]},
+
+  {id:"tiffany",n:"Tiffany & Co.",cat:"Luxe · Joaillerie",sc:52,gr:"Faible",stars:3,conf:"med",
+   desc:"LVMH depuis 2021. Campagnes avec Jay-Z/Beyoncé — diversité communication vs direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:44,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Campagne Jay-Z/Beyoncé : diversité communication sans impact direction."},{i:"⚠️",t:"Intégration LVMH — voir critique groupe."},{i:"⚠️",t:"Progrès visuels réels — données direction insuffisantes."}],
+   alts:["fenty","off-white"]},
+
+  // BEAUTÉ NATURELLE
+  {id:"noire-o",n:"Noireô",cat:"Beauté · Afro",sc:92,gr:"Excellent",stars:5,conf:"high",
+   desc:"Marque française 100% Black-owned dédiée aux peaux noires et métissées. Référence.",
+   dims:[{n:"Diversité direction",w:"40%",v:95,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:85,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:98,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:98,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Fondatrice et équipe afrodescendantes — Black-owned 100% France."},{i:"✅",t:"Formules spécifiquement développées pour peaux noires et métissées."},{i:"✅",t:"Aucune polémique. Mission sociale et économique afro-française."}],
+   alts:[]},
+
+  {id:"shea-moisture",n:"SheaMoisture",cat:"Beauté · Afro",sc:88,gr:"Très bien",stars:4,conf:"high",
+   desc:"Fondé par Libasse Lowe — héritage afro-américain fort. Acquisition Unilever à surveiller.",
+   dims:[{n:"Diversité direction",w:"40%",v:88,c:"var(--green)"},{n:"Labels & certifications",w:"20%",v:82,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:85,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:92,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Fondé par famille Lowe (Sierra Leone) — héritage centenaire préservé."},{i:"✅",t:"Produits 100% dédiés cheveux afro, naturels et texturés."},{i:"⚠️",t:"Acquisition Unilever — indépendance et mission à surveiller dans le temps."}],
+   alts:[]},
+
+  // DERNIÈRES MARQUES
+  {id:"colgate",n:"Colgate-Palmolive",cat:"Hygiène · Santé",sc:61,gr:"Moyen",stars:3,conf:"med",
+   desc:"Engagements diversité formels. Résultats dans la moyenne du secteur grande conso.",
+   dims:[{n:"Diversité direction",w:"40%",v:55,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:68,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Rapport diversité annuel publié — données direction insuffisantes."},{i:"⚠️",t:"Polémique passée logo 'Darlie' (ex-Darkie) — renommée sans changement pack."},{i:"✅",t:"Programme fournisseurs diversité — minority-owned suppliers."}],
+   alts:["procter"]},
+
+  {id:"zara-home",n:"Zara Home",cat:"Déco · Maison",sc:45,gr:"Faible",stars:2,conf:"med",
+   desc:"Filiale Inditex — voir critiques groupe. Peu d'indépendance sur les données diversité.",
+   dims:[{n:"Diversité direction",w:"40%",v:38,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:52,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:48,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:44,c:"var(--orange)"}],
+   facts:[{i:"❌",t:"Filiale Inditex — COMEX sans représentation afrodescendante identifiée."},{i:"⚠️",t:"Polémiques collections inspirées cultures africaines sans crédit."},{i:"⚠️",t:"Charte Diversité groupe — application filiale non vérifiée."}],
+   alts:["maisons-du-monde","ikea"]},
+
+  {id:"samsung",n:"Samsung",cat:"Tech · Électronique",sc:50,gr:"Faible",stars:3,conf:"med",
+   desc:"Groupe coréen avec engagements diversité insuffisants pour une marque mondiale.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Culture d'entreprise coréenne — données diversité internationale très limitées."},{i:"⚠️",t:"Rapport ESG publié — sans données précises origine ethnique direction."},{i:"⚠️",t:"Présence forte Afrique — pratiques commerciales à documenter."}],
+   alts:["apple","microsoft"]},
+
+  // ── ELON MUSK ──
+  {id:"spacex",n:"SpaceX",cat:"Tech · Aérospatiale (Musk)",sc:22,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Entreprise Elon Musk avec controverses majeures documentées. Condamnation NLRB et plaintes discrimination raciale.",
+   dims:[{n:"Diversité direction",w:"40%",v:15,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:20,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:18,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:30,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Plaintes discrimination raciale multiples d'employés noirs — enquête EEOC ouverte."},{i:"❌",t:"Elon Musk : propos racistes documentés sur X/Twitter, amplification de contenu suprémaciste."},{i:"❌",t:"Aucun rapport diversité publié. Direction quasi-exclusivement blanche et masculine."}],
+   alts:["airbus"]},
+
+  {id:"x-twitter",n:"X (ex-Twitter)",cat:"Réseaux sociaux (Musk)",sc:18,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Sous Elon Musk depuis 2022 : licenciement massif équipes Trust & Safety, explosion contenu raciste documentée.",
+   dims:[{n:"Diversité direction",w:"40%",v:12,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:15,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:15,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:28,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Licenciement 80% équipes diversité et modération dès l'arrivée de Musk (nov. 2022)."},{i:"❌",t:"Études ISD/ADL : hausse de 1 300% des tweets racistes après rachat."},{i:"❌",t:"Réinstallation de comptes néo-nazis bannis — politique dite de 'liberté d'expression'."}],
+   alts:["spotify","netflix"]},
+
+  {id:"grok",n:"Grok / xAI",cat:"IA (Musk)",sc:14,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"IA d'Elon Musk avec biais documentés et incidents racistes lors des tests publics.",
+   dims:[{n:"Diversité direction",w:"40%",v:10,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:12,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:15,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:18,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Incidents publics : Grok a produit des contenus racistes et antisémites lors de tests (2024)."},{i:"❌",t:"Équipe xAI : quasi-aucune diversité documentée dans les postes de direction."},{i:"❌",t:"Aucune politique éthique IA publiée. Absence totale de red-teaming diversité."}],
+   alts:["claude-ai","gemini","chatgpt"]},
+
+  {id:"neuralink",n:"Neuralink",cat:"Biotech (Musk)",sc:25,gr:"Très insuffisant",stars:1,conf:"med",
+   desc:"Start-up Musk avec données RSE inexistantes et controverses bien-être animal et sécurité employés.",
+   dims:[{n:"Diversité direction",w:"40%",v:18,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:22,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:28,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:30,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Aucun rapport diversité publié. Équipe dirigeante homogène."},{i:"❌",t:"Enquête Reuters 2022 : culture de travail sous pression, signalements OSHA."},{i:"⚠️",t:"Données insuffisantes mais contexte Musk pèse fortement sur le score."}],
+   alts:[]},
+
+  {id:"boring-company",n:"The Boring Company",cat:"Infrastructure (Musk)",sc:24,gr:"Très insuffisant",stars:1,conf:"low",
+   desc:"Entreprise Musk sans données RSE. Profil identique aux autres entités du groupe.",
+   dims:[{n:"Diversité direction",w:"40%",v:18,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:20,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:30,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:28,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Aucune donnée RSE ou diversité publiée."},{i:"❌",t:"Direction homogène, profil type Silicon Valley non-diversifié."},{i:"⚠️",t:"Entreprise privée — opacité totale sur gouvernance interne."}],
+   alts:[]},
+
+  // ── IA ──
+  {id:"claude-ai",n:"Claude / Anthropic",cat:"IA",sc:72,gr:"Bien",stars:4,conf:"med",
+   desc:"Start-up IA avec culture sécurité et éthique centrale. Équipe plus diverse que la moyenne Silicon Valley.",
+   dims:[{n:"Diversité direction",w:"40%",v:65,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:80,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Politique IA responsable publiée avec équipes red-teaming diversifiées."},{i:"✅",t:"Fondateurs (Dario et Daniela Amodei) : culture inclusivité affichée et suivie."},{i:"⚠️",t:"Start-up récente — données direction formelles encore limitées."}],
+   alts:[]},
+
+  {id:"gemini",n:"Gemini / Google DeepMind",cat:"IA",sc:61,gr:"Assez bien",stars:3,conf:"high",
+   desc:"IA Google avec rapport diversité publié mais controverses équipe internes (Timnit Gebru).",
+   dims:[{n:"Diversité direction",w:"40%",v:55,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:72,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:52,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:65,c:"var(--yellow)"}],
+   facts:[{i:"❌",t:"Licenciement Timnit Gebru (2020) : chercheuse noire spécialiste biais IA — scandale mondial."},{i:"✅",t:"Google Diversity Report annuel depuis 2014 — données publiées."},{i:"⚠️",t:"Biais Gemini identifiés dans représentations raciales (incident images 2024)."}],
+   alts:["claude-ai"]},
+
+  {id:"chatgpt",n:"ChatGPT / OpenAI",cat:"IA",sc:55,gr:"Moyen",stars:3,conf:"med",
+   desc:"Leader IA grand public avec données diversité partielles. Direction peu représentative.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:55,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Rapport diversité partiel — données direction très limitées pour OpenAI."},{i:"⚠️",t:"Conseil d'administration très homogène (affaire Sam Altman 2023)."},{i:"✅",t:"Initiatives RedTeam avec chercheurs diversifiés — efforts notables."}],
+   alts:["claude-ai"]},
+
+  {id:"copilot",n:"Copilot / Microsoft",cat:"IA · Tech",sc:68,gr:"Assez bien",stars:3,conf:"high",
+   desc:"Microsoft avec l'une des meilleures politiques diversité du secteur tech. Rapport annuel détaillé.",
+   dims:[{n:"Diversité direction",w:"40%",v:62,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:70,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:65,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Diversity & Inclusion Report annuel avec données ethniques publiées (USA)."},{i:"✅",t:"Satya Nadella : leadership culture inclusive — mesures chiffrées et suivies."},{i:"⚠️",t:"Progrès plus lents en Europe — données FR limitées."}],
+   alts:["claude-ai"]},
+
+  {id:"llama",n:"Llama / Meta AI",cat:"IA",sc:48,gr:"Insuffisant",stars:2,conf:"med",
+   desc:"IA Meta avec controverses modération documentées affectant communautés noires.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:55,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:38,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"❌",t:"Audit Algo Justice 2021 : biais modération systémique contre contenus noirs."},{i:"❌",t:"Rapport interne Meta 2020 (leaked) : discrimination travailleurs noirs."},{i:"⚠️",t:"Rapport diversité publié mais stagnation des chiffres direction."}],
+   alts:["claude-ai","chatgpt"]},
+
+  // ── MARQUES HALAL ──
+  {id:"isla-delice",n:"Isla Délice",cat:"Alimentation Halal",sc:62,gr:"Assez bien",stars:3,conf:"med",
+   desc:"Leader halal français avec controverses qualité passées. Engagements inclusivité correctes pour le secteur.",
+   dims:[{n:"Diversité direction",w:"40%",v:58,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:65,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:68,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Affaire fraude étiquetage halal 2012 — sanctions et remise à niveau."},{i:"✅",t:"Marque fondée et dirigée par communauté musulmane franco-maghrébine."},{i:"⚠️",t:"Données RSE diversité limitées — PME familiale."}],
+   alts:["ldc","bigard"]},
+
+  {id:"ldc",n:"LDC (Le Duff / Poulet Rôti)",cat:"Alimentation",sc:52,gr:"Moyen",stars:3,conf:"low",
+   desc:"Groupe agroalimentaire français avec peu de données RSE diversité publiées.",
+   dims:[{n:"Diversité direction",w:"40%",v:44,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Peu de données RSE diversité publiées — groupe industriel."},{i:"⚠️",t:"Fournisseur halal de grandes surfaces — pratiques peu documentées."},{i:"✅",t:"Aucune plainte discrimination majeure identifiée."}],
+   alts:[]},
+
+  {id:"quick",n:"Quick",cat:"Restauration rapide",sc:58,gr:"Moyen",stars:3,conf:"med",
+   desc:"Chaîne proposant menu halal. Gestion Groupe Bertrand — données diversité limitées.",
+   dims:[{n:"Diversité direction",w:"40%",v:50,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Transition vers menus halal controversée — gestion communication médiocre."},{i:"⚠️",t:"Effectifs terrain très diversifiés mais direction peu représentative."},{i:"✅",t:"Employeur important communautés quartiers populaires."}],
+   alts:[]},
+
+  // ── MODE DÉJÀ PRÉSENTES — MISES À JOUR ──
+  {id:"dior-update",n:"Dior (focus recrutement)",cat:"Luxe · Focus boutiques",sc:36,gr:"Très insuffisant",stars:2,conf:"high",
+   desc:"Réalité terrain bien connue du secteur : vendeurs en boutique Dior France très majoritairement blancs. Décalage fort entre communication et pratique RH.",
+   dims:[{n:"Diversité direction",w:"40%",v:28,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:48,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:32,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:40,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Recrutement boutiques France : profil vendeur très homogène — constat terrain documenté secteur."},{i:"❌",t:"Aucune donnée publique sur diversité effectifs boutiques par origine."},{i:"⚠️",t:"Campagnes pub inclusives mais pratiques RH terrain en fort décalage."}],
+   alts:["jacquemus","ami","sezane"]},
+
+  {id:"dolce",n:"Dolce & Gabbana",cat:"Luxe",sc:24,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Maison italienne avec controverses racisme majeures et répétées. L'une des plus mal notées du luxe.",
+   dims:[{n:"Diversité direction",w:"40%",v:18,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:22,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:15,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:35,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Campagne Chine 2018 jugée raciste — boycott massif, retrait d'urgence."},{i:"❌",t:"DM racistes de Stefano Gabbana leaked — excuses non convaincantes."},{i:"❌",t:"Aucun rapport RSE diversité. Direction homogène italienne exclusive."}],
+   alts:["jacquemus","ami","sezane"]},
+
+  {id:"under-armour",n:"Under Armour",cat:"Sport",sc:48,gr:"Insuffisant",stars:2,conf:"med",
+   desc:"Marque américaine avec controverses culture interne et données diversité insuffisantes.",
+   dims:[{n:"Diversité direction",w:"40%",v:40,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:50,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:45,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"❌",t:"Enquête WSJ 2019 : culture d'entreprise toxique et discriminatoire."},{i:"⚠️",t:"Rapport diversité partiel — direction peu représentative."},{i:"✅",t:"Partenariats athlètes afro-américains nombreux (The Rock, etc.)."}],
+   alts:["nike","adidas","puma"]},
+
+  {id:"mango",n:"Mango",cat:"Prêt-à-porter",sc:53,gr:"Moyen",stars:3,conf:"med",
+   desc:"Groupe espagnol avec efforts casting récents mais direction peu représentative et données RSE limitées.",
+   dims:[{n:"Diversité direction",w:"40%",v:45,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:60,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Casting amélioré depuis 2021 — modèles plus diverses dans les campagnes."},{i:"⚠️",t:"Rapport RSE publié mais section diversité origine très superficielle."},{i:"⚠️",t:"Direction groupe très homogène (famille Andic — Barcelone)."}],
+   alts:["hm","sezane","jacquemus"]},
+
+  {id:"pull-bear",n:"Pull & Bear",cat:"Prêt-à-porter · Inditex",sc:44,gr:"Insuffisant",stars:2,conf:"med",
+   desc:"Marque Inditex (Zara) avec mêmes limites que le groupe sur la diversité direction.",
+   dims:[{n:"Diversité direction",w:"40%",v:35,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:52,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:50,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:42,c:"var(--red)"}],
+   facts:[{i:"⚠️",t:"Dépend données groupe Inditex — direction Inditex très homogène."},{i:"⚠️",t:"Casting récemment un peu plus diversifié — progrès timides."},{i:"⚠️",t:"Aucun label diversité indépendant du groupe."}],
+   alts:["hm","sezane","jacquemus"]},
+
+  {id:"levis",n:"Levi's",cat:"Prêt-à-porter",sc:71,gr:"Bien",stars:4,conf:"high",
+   desc:"Marque américaine avec engagement diversité fort et historique. Rapport annuel publié, objectifs chiffrés.",
+   dims:[{n:"Diversité direction",w:"40%",v:68,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:70,c:"var(--green)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel avec données ethniques détaillées (USA)."},{i:"✅",t:"Campagnes inclusives historiques — ADN marque lié aux droits civiques."},{i:"⚠️",t:"Direction exécutive encore peu représentative malgré politique avancée."}],
+   alts:[]},
+
+  {id:"polene",n:"Polène",cat:"Maroquinerie française",sc:45,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Marque française DTC avec données RSE quasi inexistantes. Casting peu représentatif.",
+   dims:[{n:"Diversité direction",w:"40%",v:36,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:42,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:62,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:40,c:"var(--red)"}],
+   facts:[{i:"⚠️",t:"Start-up DTC — aucun rapport RSE diversité publié."},{i:"⚠️",t:"Casting campagnes très peu diversifié — quasi-exclusivement blanc."},{i:"⚠️",t:"Aucun label diversité. Structure familiale opaque."}],
+   alts:["jacquemus","sezane","ami"]},
+
+  // ── DISTRIBUTION ──
+  {id:"auchan",n:"Auchan",cat:"Distribution",sc:48,gr:"Insuffisant",stars:2,conf:"med",
+   desc:"Groupe Mulliez avec données RSE diversité très limitées et controverses sociales.",
+   dims:[{n:"Diversité direction",w:"40%",v:40,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:55,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:48,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Groupe familial Mulliez — données RSE diversité peu publiées."},{i:"⚠️",t:"Présence Russie maintenue après 2022 — image RSE dégradée."},{i:"⚠️",t:"Effectifs terrain diversifiés mais direction très homogène."}],
+   alts:["carrefour","monoprix"]},
+
+  {id:"aldi",n:"Aldi",cat:"Distribution hard-discount",sc:36,gr:"Très insuffisant",stars:2,conf:"low",
+   desc:"Groupe allemand ultra-opaque. Aucun rapport RSE publié. Score pénalisé par absence totale de transparence.",
+   dims:[{n:"Diversité direction",w:"40%",v:28,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:38,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:42,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:35,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Aucun rapport RSE publié. Politique de confidentialité absolue du groupe."},{i:"❌",t:"Direction groupe quasi-invisible — famille Albrecht, aucune donnée diversité."},{i:"⚠️",t:"Employeur important en France — pratiques inconnues faute de transparence."}],
+   alts:["lidl","carrefour"]},
+
+  {id:"lidl",n:"Lidl",cat:"Distribution hard-discount",sc:50,gr:"Moyen",stars:3,conf:"med",
+   desc:"Plus transparent qu'Aldi, Lidl publie un rapport RSE. Direction encore peu représentative.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Rapport RSE annuel publié — mieux qu'Aldi mais section diversité superficielle."},{i:"⚠️",t:"Direction très homogène (groupe Schwarz, Allemagne)."},{i:"✅",t:"Employeur de référence banlieues et QPV — terrain plus diversifié."}],
+   alts:["carrefour","monoprix"]},
+
+  {id:"action",n:"Action",cat:"Distribution non-alimentaire",sc:35,gr:"Très insuffisant",stars:2,conf:"low",
+   desc:"Groupe néerlandais avec aucune donnée RSE diversité publiée. Opacité totale.",
+   dims:[{n:"Diversité direction",w:"40%",v:27,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:35,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:42,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:38,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Aucun rapport RSE diversité — groupe privé sans obligation de publication."},{i:"❌",t:"Direction néerlandaise — aucune donnée sur représentation afrodescendante."},{i:"⚠️",t:"Clientèle très diverse — politique inclusivité interne inconnue."}],
+   alts:["decathlon","fnac"]},
+
+  {id:"normal",n:"Normal",cat:"Distribution non-alimentaire",sc:38,gr:"Très insuffisant",stars:2,conf:"low",
+   desc:"Enseigne danoise récente en France. Aucune donnée RSE diversité disponible.",
+   dims:[{n:"Diversité direction",w:"40%",v:30,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:38,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:48,c:"var(--orange)"},{n:"Écosystème Black-owned",w:"20%",v:36,c:"var(--red)"}],
+   facts:[{i:"⚠️",t:"Marque récente en France — aucune donnée RSE diversité publiée."},{i:"⚠️",t:"Direction danoise — aucune information sur représentation."},{i:"⚠️",t:"Score pénalisé par manque total de transparence."}],
+   alts:["decathlon","fnac"]}
+];
+
+// ============================================================
+// UTILS
+// ============================================================
+function scoreColor(v){
+  if(v<40) return 'var(--red)';
+  if(v<60) return 'var(--orange)';
+  if(v<75) return 'var(--yellow)';
+  return 'var(--green)';
+}
+function scoreBg(v){
+  if(v<40) return 'var(--red-bg)';
+  if(v<60) return 'var(--orange-bg)';
+  if(v<75) return 'var(--yellow-bg)';
+  return 'var(--green-bg)';
+}
+function scoreClass(v){
+  if(v<40) return 'score-red';
+  if(v<60) return 'score-orange';
+  if(v<75) return 'score-yellow';
+  return 'score-green';
+}
+function starsHtml(n){
+  let h='';
+  for(let i=1;i<=5;i++) h+=`<div class="star ${i<=n?'on':'off'}"></div>`;
+  return h;
+}
+function confClass(c){
+  if(c==='high') return 'conf-high';
+  if(c==='med') return 'conf-med';
+  return 'conf-low';
+}
+function confLabel(c){
+  if(c==='high') return 'Données vérifiées · Confiance haute';
+  if(c==='med') return 'Proxies indirects · Confiance moyenne · Mis à jour jan. 2024';
+  return 'Données insuffisantes · Estimation · ±15 points';
+}
+
+// ============================================================
+// RENDER BRAND LIST
+// ============================================================
+function renderList(brands, label){
+  const lbl = document.getElementById('list-label');
+  const lst = document.getElementById('brand-list');
+  lbl.textContent = label || 'Marques populaires';
+  if(!brands.length){
+    lst.innerHTML='<div class="no-result">Aucune marque trouvée.<br>Essayez un autre mot-clé.</div>';
+    return;
+  }
+  lst.innerHTML = brands.map(b=>`
+    <div class="brand-row" onclick="openBrand('${b.id}')">
+      <div class="brand-badge ${scoreClass(b.sc)}">${b.sc}</div>
+      <div class="brand-info">
+        <div class="brand-name-text">${b.n}</div>
+        <div class="brand-cat-text">${b.cat}</div>
+      </div>
+      <div class="brand-arr">›</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// SEARCH
+// ============================================================
+function normalize(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+function liveSearch(q){
+  q=q.trim();
+  if(!q){ renderList(popularBrands(),'Marques populaires'); return; }
+  const r = DB.filter(b=>
+    normalize(b.n).includes(normalize(q)) ||
+    normalize(b.cat).includes(normalize(q)) ||
+    normalize(b.id).includes(normalize(q))
+  ).sort((a,b)=>b.sc-a.sc);
+  renderList(r, r.length ? `${r.length} résultat${r.length>1?'s':''}` : 'Aucun résultat');
+}
+
+function doSearch(){
+  const q = document.getElementById('q').value.trim();
+  if(!q) return;
+  liveSearch(q);
+  const exact = DB.find(b=>normalize(b.n)===normalize(q));
+  if(exact){ showLoader('Analyse en cours…',()=>openBrand(exact.id)); }
+  else {
+    const r=DB.filter(b=>normalize(b.n).includes(normalize(q)));
+    if(r.length===1) showLoader('Analyse en cours…',()=>openBrand(r[0].id));
+  }
+}
+
+function popularBrands(){
+  const pop=['nike','fenty','danone','hermes','netflix','decathlon','noire-o','alter-eco','google','jordan'];
+  return pop.map(id=>DB.find(b=>b.id===id)).filter(Boolean);
+}
+
+// ============================================================
+// OPEN BRAND / RESULT
+// ============================================================
+function openBrand(id){
+  const b=DB.find(x=>x.id===id);
+  if(!b) return;
+  showLoader('Analyse en cours…',()=>renderResult(b));
+}
+
+function renderResult(b){
+  document.getElementById('r-name').textContent=b.n;
+  document.getElementById('r-cat').textContent=b.cat;
+  document.getElementById('r-score').textContent=b.sc;
+  document.getElementById('r-grade').textContent=b.gr;
+  document.getElementById('r-desc').textContent=b.desc;
+  document.getElementById('r-stars').innerHTML=starsHtml(b.stars);
+
+  const conf=document.getElementById('r-conf');
+  conf.className='conf-badge '+confClass(b.conf);
+  document.getElementById('r-conf-text').textContent=confLabel(b.conf);
+
+  document.getElementById('r-dims').innerHTML=b.dims.map(d=>`
+    <div class="dim">
+      <div class="dim-top">
+        <span class="dim-name">${d.n}</span>
+        <span class="dim-wt">Poids ${d.w}</span>
+      </div>
+      <div class="dim-row">
+        <div class="bar"><div class="bar-fill" style="background:${d.c}" data-w="${d.v}"></div></div>
+        <span class="dim-val" style="color:${d.c}">${d.v}</span>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('r-facts').innerHTML=b.facts.map(f=>`
+    <div class="fact"><span class="fact-ic">${f.i}</span><span class="fact-tx">${f.t}</span></div>
+  `).join('');
+
+  const altsBox=document.getElementById('r-alts-box');
+  if(b.alts && b.alts.length){
+    const alts=b.alts.map(id=>DB.find(x=>x.id===id)).filter(Boolean);
+    document.getElementById('r-alts').innerHTML=alts.map(a=>`
+      <div class="alt" onclick="openBrand('${a.id}')">
+        <span class="alt-name">${a.n}</span>
+        <span class="alt-score">${a.sc}/100</span>
+        <span class="alt-arr">›</span>
+      </div>
+    `).join('');
+    altsBox.style.display='block';
+  } else { altsBox.style.display='none'; }
+
+  goTab('result-internal');
+
+  setTimeout(()=>{
+    document.querySelectorAll('.bar-fill').forEach(el=>{
+      el.style.width=el.dataset.w+'%';
+    });
+  },150);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+let prevTab='scan';
+
+function goBack(){
+  goTab(prevTab);
+}
+
+function goTab(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+
+  if(name==='result-internal'){
+    document.getElementById('s-result').classList.add('active');
+    document.getElementById('s-result').scrollTop=0;
+    return;
+  }
+  if(name==='scan'){
+    document.getElementById('s-scan').classList.add('active');
+    document.getElementById('tab-scan').classList.add('on');
+    prevTab='scan';
+  } else if(name==='about'){
+    document.getElementById('s-about').classList.add('active');
+    document.getElementById('tab-about').classList.add('on');
+    prevTab='about';
+  }
+}
+
+// ============================================================
+// LOADER
+// ============================================================
+function showLoader(msg, cb){
+  const el=document.getElementById('loader');
+  document.getElementById('loader-text').textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>{
+    el.classList.remove('show');
+    cb();
+  }, 900);
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg){
+  const el=document.getElementById('toast-el');
+  el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ============================================================
+// SHARE
+// ============================================================
+function shareResult(){
+  const name=document.getElementById('r-name').textContent;
+  const score=document.getElementById('r-score').textContent;
+  const grade=document.getElementById('r-grade').textContent;
+  if(navigator.share){
+    navigator.share({
+      title:'Khollo · '+name,
+      text:`${name} : ${score}/100 (${grade}) sur Khollo, l'app qui analyse l'inclusivité des marques.`,
+      url:window.location.href
+    }).catch(()=>{});
+  } else {
+    const txt=`${name} : ${score}/100 (${grade}) — khollo.app`;
+    navigator.clipboard.writeText(txt).then(()=>toast('Score copié dans le presse-papier !'));
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderList(popularBrands(),'Marques populaires');
+</script>
+</body>
+</html>
