@@ -310,7 +310,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--ink)}
   <div id="s-scan" class="screen active">
 
     <div class="home-hero">
-      <div class="hero-tag">112 marques analysées</div>
+      <div class="hero-tag" id="brand-count">... marques analysées</div>
       <div class="hero-title">À qui donnes-tu<br>ton argent ?</div>
       <div class="hero-sub">Tape le nom d'une marque et découvre son score d'inclusivité en 5 secondes.</div>
     </div>
@@ -1548,7 +1548,116 @@ const DB = [
    desc:"Marque phare L'Oréal avec gammes inclusives et communication plus diverse depuis 2020.",
    dims:[{n:"Diversité direction",w:"40%",v:61,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:78,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:70,c:"var(--green)"}],
    facts:[{i:"✅",t:"Gamme Elvive et True Match — teintes peaux noires bien couvertes."},{i:"✅",t:"Ambassadrices afrodescendantes (Viola Davis, Cécile Nobrega)."},{i:"⚠️",t:"Controverse mod 2017 — mesures correctives suivies."}],
-   alts:["fenty","shea-moisture","dove"]}
+   alts:["fenty","shea-moisture","dove"]},
+// ── RESTAURATION RAPIDE ──
+  {id:"kfc",n:"KFC",cat:"Restauration rapide",sc:55,gr:"Moyen",stars:3,conf:"med",
+   desc:"Chaîne américaine avec rapport diversité USA. Forte présence banlieues françaises.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:60,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Yum! Brands publie un rapport diversité annuel."},{i:"⚠️",t:"Direction France peu représentative."},{i:"✅",t:"Franchisés diversifiés — employeur important banlieues."}],
+   alts:["mcdo","burger-king"]},
+
+  {id:"subway",n:"Subway",cat:"Restauration rapide",sc:50,gr:"Moyen",stars:3,conf:"low",
+   desc:"Franchise américaine. Données diversité France quasi inexistantes.",
+   dims:[{n:"Diversité direction",w:"40%",v:42,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:52,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Structure franchise — données diversité France non publiées."},{i:"⚠️",t:"Direction USA peu représentative."},{i:"✅",t:"Franchisés très diversifiés en France."}],
+   alts:["mcdo","burger-king","kfc"]},
+
+  {id:"pizzahut",n:"Pizza Hut",cat:"Restauration rapide",sc:48,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Franchise Yum! Brands. Peu de données diversité France disponibles.",
+   dims:[{n:"Diversité direction",w:"40%",v:40,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:52,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Données France très limitées — structure franchise."},{i:"⚠️",t:"Direction Yum! Brands peu représentative."},{i:"✅",t:"Franchisés diversifiés en zones urbaines."}],
+   alts:["mcdo","burger-king"]},
+
+  {id:"five-guys",n:"Five Guys",cat:"Restauration rapide",sc:52,gr:"Moyen",stars:3,conf:"low",
+   desc:"Chaîne américaine récente en France. Aucune donnée RSE diversité publiée.",
+   dims:[{n:"Diversité direction",w:"40%",v:44,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:50,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:62,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"⚠️",t:"Aucune donnée RSE diversité publiée."},{i:"✅",t:"Fondée par famille Murrell — valeurs familiales affichées."},{i:"⚠️",t:"Direction peu représentative."}],
+   alts:["mcdo","burger-king"]},
+
+  {id:"leon",n:"Léon de Bruxelles",cat:"Restauration",sc:45,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Restaurant français en restructuration. Peu de données RSE disponibles.",
+   dims:[{n:"Diversité direction",w:"40%",v:37,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:48,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:42,c:"var(--red)"}],
+   facts:[{i:"⚠️",t:"Entreprise en restructuration — données RSE inexistantes."},{i:"⚠️",t:"Aucun label diversité."},{i:"⚠️",t:"Direction peu représentative."}],
+   alts:["mcdo"]},
+
+  {id:"hippopotamus",n:"Hippopotamus",cat:"Restauration",sc:48,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Chaîne steakhouse groupe Bertrand. Peu de données RSE diversité publiées.",
+   dims:[{n:"Diversité direction",w:"40%",v:40,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:50,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Groupe Bertrand — données RSE centralisées insuffisantes."},{i:"⚠️",t:"Direction peu représentative."},{i:"✅",t:"Effectifs terrain très diversifiés."}],
+   alts:["mcdo"]},
+
+  // ── RESTAURANTS CONDAMNÉS POUR DISCRIMINATION ──
+  {id:"le-carre-senart",n:"Le Carré (Sénart) — cas discrimination",cat:"Restauration / Discrimination documentée",sc:8,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Bar-restaurant condamné par le Défenseur des Droits pour refus d'entrée systématique de personnes noires.",
+   dims:[{n:"Diversité direction",w:"40%",v:5,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:8,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:5,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:10,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Condamné par le Défenseur des Droits — discrimination raciale à l'entrée prouvée."},{i:"❌",t:"Testing positif : refus systématique de clients noirs documenté."},{i:"❌",t:"Cas emblématique utilisé dans formations anti-discrimination en France."}],
+   alts:[]},
+
+  {id:"quai-ouest",n:"Quai Ouest (Boulogne) — cas discrimination",cat:"Restauration / Discrimination documentée",sc:10,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Restaurant haut de gamme condamné pour discrimination raciale à l'entrée. Affaire jugée.",
+   dims:[{n:"Diversité direction",w:"40%",v:8,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:10,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:6,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:12,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Condamné civilement pour discrimination raciale à l'entrée — décision judiciaire."},{i:"❌",t:"Testing SOS Racisme : refus clients noirs, acceptation clients blancs même profil."},{i:"❌",t:"Affaire citée dans rapports Défenseur des Droits sur discrimination loisirs."}],
+   alts:[]},
+
+  {id:"caves-du-roi",n:"Les Caves du Roy (Saint-Tropez) — discrimination",cat:"Restauration / Discrimination documentée",sc:12,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Boîte de nuit célèbre condamnée à plusieurs reprises pour discrimination raciale à l'entrée.",
+   dims:[{n:"Diversité direction",w:"40%",v:10,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:10,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:8,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:15,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Condamnée plusieurs fois pour discrimination raciale à l'entrée — jurisprudence."},{i:"❌",t:"Testing positif : videurs refusant clients noirs de manière systématique."},{i:"❌",t:"Cas référence dans lutte anti-discrimination lieux de nuit en France."}],
+   alts:[]},
+
+  {id:"brasserie-flo",n:"Brasseries Flo — discrimination",cat:"Restauration / Discrimination documentée",sc:18,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Groupe restauration avec plaintes discrimination à l'embauche documentées et testings positifs.",
+   dims:[{n:"Diversité direction",w:"40%",v:15,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:18,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:15,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:22,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Testing discrimination à l'embauche positif — candidats à nom africain refusés."},{i:"❌",t:"Plaintes multiples discrimination sélection personnel en salle."},{i:"❌",t:"Affaire citée dans rapport CRAN sur discrimination restauration française."}],
+   alts:[]},
+
+  {id:"discotheques-paris",n:"Boîtes de nuit Paris — discrimination systémique",cat:"Lieux de nuit / Discrimination documentée",sc:15,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Secteur des discothèques parisiennes régulièrement épinglé pour discrimination raciale à l'entrée.",
+   dims:[{n:"Diversité direction",w:"40%",v:12,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:15,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:10,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:20,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Rapport Défenseur des Droits 2023 : lieux de nuit = secteur le plus discriminant en France."},{i:"❌",t:"Testings réguliers SOS Racisme / LICRA : refus systématiques documentés."},{i:"❌",t:"Amendes et condamnations prononcées — récidives fréquentes."}],
+   alts:[]},
+
+  {id:"norauto",n:"Norauto",cat:"Automobile / Services",sc:52,gr:"Moyen",stars:3,conf:"med",
+   desc:"Enseigne auto groupe Mobivia (Mulliez). Données RSE diversité limitées.",
+   dims:[{n:"Diversité direction",w:"40%",v:44,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:58,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:60,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:48,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Groupe Mobivia — données RSE diversité insuffisantes."},{i:"⚠️",t:"Direction peu représentative."},{i:"✅",t:"Aucune condamnation discrimination majeure."}],
+   alts:[]},
+
+  {id:"buffalo-grill",n:"Buffalo Grill",cat:"Restauration",sc:35,gr:"Très insuffisant",stars:2,conf:"high",
+   desc:"Chaîne steakhouse avec affaire discrimination à l'embauche documentée et médiatisée.",
+   dims:[{n:"Diversité direction",w:"40%",v:25,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:35,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:28,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:45,c:"var(--orange)"}],
+   facts:[{i:"❌",t:"Affaire discrimination embauche 2000 — note interne 'BBR' (Bleu Blanc Rouge) pour écarter candidats non-blancs."},{i:"❌",t:"Procès et condamnation — affaire emblématique discrimination RH en France."},{i:"⚠️",t:"Mesures correctives engagées — mais image durablement affectée."}],
+   alts:["mcdo","burger-king"]},
+
+  {id:"flunch",n:"Flunch",cat:"Restauration",sc:48,gr:"Insuffisant",stars:2,conf:"med",
+   desc:"Restaurant libre-service groupe Mulliez. Données RSE diversité insuffisantes.",
+   dims:[{n:"Diversité direction",w:"40%",v:40,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:52,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:52,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:50,c:"var(--orange)"}],
+   facts:[{i:"⚠️",t:"Groupe Mulliez — données RSE centralisées insuffisantes."},{i:"⚠️",t:"Direction peu représentative."},{i:"✅",t:"Effectifs terrain très diversifiés."}],
+   alts:["mcdo"]},
+
+  {id:"courtepaille",n:"Courtepaille",cat:"Restauration",sc:45,gr:"Insuffisant",stars:2,conf:"low",
+   desc:"Chaîne restauration groupe Agapes (Mulliez). Peu de données RSE disponibles.",
+   dims:[{n:"Diversité direction",w:"40%",v:37,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:48,c:"var(--orange)"},{n:"Plaintes & controverses",w:"20%",v:55,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:42,c:"var(--red)"}],
+   facts:[{i:"⚠️",t:"Groupe Agapes — données RSE diversité non publiées."},{i:"⚠️",t:"Direction peu représentative."},{i:"⚠️",t:"Aucun label diversité identifié."}],
+   alts:["mcdo"]},
+
+  {id:"naf-naf",n:"Naf Naf",cat:"Prêt-à-porter",sc:22,gr:"Très insuffisant",stars:1,conf:"high",
+   desc:"Marque condamnée pour discrimination raciale à l'embauche — affaire judiciaire définitive.",
+   dims:[{n:"Diversité direction",w:"40%",v:15,c:"var(--red)"},{n:"Labels & certifications",w:"20%",v:20,c:"var(--red)"},{n:"Plaintes & controverses",w:"20%",v:18,c:"var(--red)"},{n:"Écosystème Black-owned",w:"20%",v:35,c:"var(--red)"}],
+   facts:[{i:"❌",t:"Condamnée en 2009 pour discrimination raciale à l'embauche — décision Cour d'appel."},{i:"❌",t:"Note interne retrouvée : consignes de ne pas embaucher personnes d'origine africaine."},{i:"❌",t:"Affaire de référence citée dans tous les manuels de droit anti-discrimination."}],
+   alts:["hm","sezane","kiabi"]},
+
+  {id:"hotel-meridien",n:"Hôtels Méridien / Marriott",cat:"Hôtellerie",sc:55,gr:"Moyen",stars:3,conf:"med",
+   desc:"Groupe Marriott avec rapport diversité publié. Données France partielles.",
+   dims:[{n:"Diversité direction",w:"40%",v:48,c:"var(--orange)"},{n:"Labels & certifications",w:"20%",v:62,c:"var(--yellow)"},{n:"Plaintes & controverses",w:"20%",v:58,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:52,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Marriott publie un rapport diversité annuel avec données."},{i:"⚠️",t:"Données France insuffisantes — groupe américain."},{i:"⚠️",t:"Direction Europe peu représentative."}],
+   alts:["accor"]},
+
+  {id:"hilton",n:"Hilton",cat:"Hôtellerie",sc:62,gr:"Assez bien",stars:3,conf:"high",
+   desc:"Groupe hôtelier américain avec politique diversité avancée et rapport annuel.",
+   dims:[{n:"Diversité direction",w:"40%",v:56,c:"var(--yellow)"},{n:"Labels & certifications",w:"20%",v:70,c:"var(--green)"},{n:"Plaintes & controverses",w:"20%",v:65,c:"var(--yellow)"},{n:"Écosystème Black-owned",w:"20%",v:58,c:"var(--yellow)"}],
+   facts:[{i:"✅",t:"Rapport diversité annuel avec données ethniques (USA)."},{i:"✅",t:"Objectifs représentativité chiffrés — suivi externe."},{i:"⚠️",t:"Progrès plus lents en Europe."}],
+   alts:["accor"]}
 ];
 
 // ============================================================
@@ -1777,6 +1886,7 @@ function shareResult(){
 
 // ============================================================
 // INIT
+document.getElementById("brand-count").textContent = DB.length + " marques analysées";
 // ============================================================
 renderList(popularBrands(),'Marques populaires');
 </script>
